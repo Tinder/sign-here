@@ -1,0 +1,27 @@
+//
+//  CreateProfileResponse.swift
+//  iTunesConnectLibrary
+//
+//  Created by Maxwell Elliott on 04/04/23.
+//
+
+import Foundation
+
+internal struct CreateProfileResponse: Codable {
+    struct CreateProfileResponseData: Codable {
+        struct Attributes: Codable {
+            var profileContent: String
+            var uuid: String
+            var name: String
+            var platform: String
+            var createdDate: Date
+            var profileState: String
+            var profileType: String
+            var expirationDate: Date
+        }
+        var id: String
+        var type: String
+        var attributes: Attributes
+    }
+    var data: CreateProfileResponseData
+}

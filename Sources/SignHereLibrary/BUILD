@@ -11,6 +11,8 @@ swift_library(
         "//Sources/SignHereTool:__pkg__",
     ],
     deps = [
-        "@ArgumentParser",
+        "//Sources/CoreLibrary",
+        "@com_github_apple_swift-argument-parser//:ArgumentParser",
+        "@com_github_kitura_blueecc//:BlueECC",
     ],
 )
