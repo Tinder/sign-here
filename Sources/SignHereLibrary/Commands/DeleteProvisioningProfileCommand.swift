@@ -2,7 +2,7 @@
 //  DeleteProvisioningProfileCommand.swift
 //  Commands
 //
-//  Created by Maxwell Elliott on 04/10/23.
+//  Created by Maxwell Elliott on 04/24/23.
 //
 
 import ArgumentParser

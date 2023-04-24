@@ -1,0 +1,32 @@
+▿ 3 elements
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 5 elements
+      - "security"
+      - "create-keychain"
+      - "-p"
+      - "keychainPassword"
+      - "keychainName"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 6 elements
+      - "security"
+      - "set-keychain-settings"
+      - "-t"
+      - "7200"
+      - "-l"
+      - "keychainName"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 5 elements
+      - "security"
+      - "unlock-keychain"
+      - "-p"
+      - "keychainPassword"
+      - "keychainName"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none

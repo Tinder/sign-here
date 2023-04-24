@@ -1,0 +1,4 @@
+[iTunesConnectServiceImp] Unable to determine modulus for private key
+- Private Key: /privateKeyPath
+- Output: output
+- Error: errorOutput

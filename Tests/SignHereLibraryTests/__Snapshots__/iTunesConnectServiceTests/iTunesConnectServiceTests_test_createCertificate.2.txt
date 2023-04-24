@@ -1,0 +1,10 @@
+▿ CreateCertificateResponse
+  ▿ data: CreateCertificateData
+    ▿ attributes: CreateCertificateResponseAttributes
+      - certificateContent: "dGVzdAo="
+      - certificateType: "certificateType"
+      - displayName: "createdCertDisplayName"
+      - name: "createdCertName"
+      - serialNumber: "createdCertSerialNumber"
+    - id: "createdCertID"
+    - type: "certificates"

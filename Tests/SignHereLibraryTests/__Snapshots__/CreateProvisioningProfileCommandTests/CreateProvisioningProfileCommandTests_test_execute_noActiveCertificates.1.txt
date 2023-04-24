@@ -1,0 +1,85 @@
+▿ 6 elements
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 9 elements
+      - "/opensslPath"
+      - "req"
+      - "-new"
+      - "-key"
+      - "privateKeyPath"
+      - "-out"
+      - "/unique_temporary_path_1/certificate_request.csr"
+      - "-subj"
+      - "certificateSigningRequestSubject"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 10 elements
+      - "/opensslPath"
+      - "x509"
+      - "-inform"
+      - "DER"
+      - "-outform"
+      - "PEM"
+      - "-in"
+      - "/unique_temporary_path_2/createdCertID.cer"
+      - "-out"
+      - "/unique_temporary_path_3/certificate.pem"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 11 elements
+      - "/opensslPath"
+      - "pkcs12"
+      - "-export"
+      - "-inkey"
+      - "privateKeyPath"
+      - "-in"
+      - "/unique_temporary_path_3/certificate.pem"
+      - "-passout"
+      - "pass:uuid_1"
+      - "-out"
+      - "/unique_temporary_path_4/identity.p12"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 9 elements
+      - "security"
+      - "import"
+      - "/unique_temporary_path_4/identity.p12"
+      - "-k"
+      - "keychainName"
+      - "-P"
+      - "uuid_1"
+      - "-T"
+      - "/usr/bin/codesign"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 7 elements
+      - "security"
+      - "import"
+      - "/intermediaryAppleCertificate"
+      - "-k"
+      - "keychainName"
+      - "-T"
+      - "/usr/bin/codesign"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 8 elements
+      - "security"
+      - "set-key-partition-list"
+      - "-S"
+      - "apple-tool:,apple:,codesign:"
+      - "-s"
+      - "-k"
+      - "keychainPassword"
+      - "keychainName"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none

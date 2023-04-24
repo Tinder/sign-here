@@ -1,0 +1,2 @@
+[iTunesConnectServiceImp] Unable to base 64 decode certificate
+- Certificate display name: displayName

@@ -18,7 +18,7 @@ def sign_here_dependencies():
 
     _maybe(
         http_archive,
-        name = "com_github_apple_swift-argument-parser",
+        name = "com_github_apple_swift_argument_parser",
         url = "https://github.com/apple/swift-argument-parser/archive/refs/tags/1.2.2.tar.gz",
         strip_prefix = "swift-argument-parser-1.2.2",
         sha256 = "44782ba7180f924f72661b8f457c268929ccd20441eac17301f18eff3b91ce0c",
@@ -44,6 +44,9 @@ swift_library(
     srcs = glob([
         "Sources/ArgumentParser/**/*.swift"
     ], allow_empty = False),
+    copts = [
+        "-suppress-warnings",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":ArgumentParserToolInfo"
@@ -67,6 +70,9 @@ swift_library(
     srcs = glob([
         "Sources/**/*.swift"
     ], allow_empty = False),
+    copts = [
+        "-suppress-warnings",
+    ],
     visibility = ["//visibility:public"],
 )
         """,
@@ -94,4 +100,231 @@ swift_library(
 )
         """,
         sha256 = "c708192350913e9fa9a412bde60dcf9cc2e90b58573c4f6af1298dd27e31c642",
+    )
+
+    MOCKOLO_VERSION = "1.7.0"
+
+    _maybe(
+        http_archive,
+        name = "mockolo",
+        build_file_content = """
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_binary", "swift_library")
+
+swift_library(
+    name = "MockoloFramework",
+    srcs = glob(
+        [
+            "Sources/MockoloFramework/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    copts = ["-suppress-warnings"],
+    module_name = "MockoloFramework",
+    deps = [
+        "@SwiftToolsSupportCore//:TSCUtility",
+        "@com_github_apple_swift_argument_parser//:ArgumentParser",
+        "@com_github_keith_swift_syntax//:SwiftSyntax",
+        "@com_github_keith_swift_syntax//:SwiftSyntaxParser",
+    ],
+)
+
+swift_library(
+    name = "Mockolo",
+    srcs = glob(
+        [
+            "Sources/Mockolo/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    copts = [
+        "-suppress-warnings",
+    ],
+    module_name = "Mockolo",
+    deps = [
+        ":MockoloFramework",
+    ],
+)
+
+swift_binary(
+    name = "mockolo",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Mockolo",
+    ],
+)
+        """,
+        sha256 = "b36c49d835895b643e631c5cba3c9048f0628f68d37c5adf739a30de93677304",
+        strip_prefix = "mockolo-%s" % MOCKOLO_VERSION,
+        urls = ["https://github.com/uber/mockolo/archive/%s.tar.gz" % MOCKOLO_VERSION],
+    )
+
+    _maybe(
+        http_archive,
+        name = "com_github_keith_swift_syntax_bazel",
+        sha256 = "379e3d4238acf313da444663243f20a479040b765324f743ce3120055b4e9772",
+        strip_prefix = "swift-syntax-bazel-14.1.0.14B47b",
+        url = "https://github.com/keith/swift-syntax-bazel/archive/refs/tags/14.1.0.14B47b.tar.gz",
+    )
+
+    SWIFT_TOOLS_SUPPORT_CORE_VERSION = "0.5.2"
+
+    _maybe(
+        http_archive,
+        name = "SwiftToolsSupportCore",
+        build_file_content = """
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+
+objc_library(
+    name = "TSCclibc",
+    srcs = glob(
+        [
+            "Sources/TSCclibc/*.c",
+        ],
+        allow_empty = False,
+    ),
+    hdrs = [
+        "Sources/TSCclibc/include/TSCclibc.h",
+        "Sources/TSCclibc/include/indexstore_functions.h",
+        "Sources/TSCclibc/include/process.h",
+    ],
+    copts = [
+        "-w",
+    ],
+    module_name = "TSCclibc",
+)
+
+swift_library(
+    name = "TSCLibc",
+    srcs = glob(
+        [
+            "Sources/TSCLibc/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    copts = [
+        "-suppress-warnings",
+    ],
+    module_name = "TSCLibc",
+    deps = [
+        ":TSCclibc",
+    ],
+)
+
+swift_library(
+    name = "TSCBasic",
+    srcs = glob(
+        [
+            "Sources/TSCBasic/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    copts = [
+        "-suppress-warnings",
+    ],
+    module_name = "TSCBasic",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":TSCLibc",
+        "@com_github_apple_swift_system//:SystemPackage",
+    ],
+)
+
+swift_library(
+    name = "TSCUtility",
+    srcs = glob(
+        [
+            "Sources/TSCUtility/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    copts = [
+        "-suppress-warnings",
+    ],
+    module_name = "TSCUtility",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":TSCBasic",
+    ],
+)
+
+        """,
+        sha256 = "3b07acf24ad49bf72f2825a39c542396880e89ab7e840ec2eed2cdb75696a17c",
+        strip_prefix = "swift-tools-support-core-%s" % SWIFT_TOOLS_SUPPORT_CORE_VERSION,
+        url = "https://github.com/apple/swift-tools-support-core/archive/refs/tags/%s.tar.gz" % SWIFT_TOOLS_SUPPORT_CORE_VERSION,
+    )
+
+    SWIFT_SYSTEM_VERSION = "1.2.1"
+
+    _maybe(
+        http_archive,
+        name = "com_github_apple_swift_system",
+        build_file_content = """
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+
+objc_library(
+    name = "CSystem",
+    srcs = glob(
+        [
+            "Sources/CSystem/*.c",
+        ],
+        allow_empty = False,
+    ),
+    copts = [
+        "-w",
+    ],
+    module_name = "CSystem",
+)
+
+swift_library(
+    name = "SystemPackage",
+    srcs = glob(
+        [
+            "Sources/System/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    defines = [
+        "SYSTEM_PACKAGE",
+    ],
+    copts = [
+        "-suppress-warnings",
+    ],
+    module_name = "SystemPackage",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":CSystem",
+    ],
+)
+        """,
+        sha256 = "ab771be8a944893f95eed901be0a81a72ef97add6caa3d0981e61b9b903a987d",
+        strip_prefix = "swift-system-%s" % SWIFT_SYSTEM_VERSION,
+        url = "https://github.com/apple/swift-system/archive/refs/tags/%s.tar.gz" % SWIFT_SYSTEM_VERSION,
+    )
+
+    SWIFT_SNAPSHOT_TESTING_GIT_SHA = "c466812aa2e22898f27557e2e780d3aad7a27203"
+
+    http_archive(
+        name = "SwiftSnapshotTesting",
+        build_file_content = """
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+
+swift_library(
+    name = "SnapshotTesting",
+    testonly = True,
+    srcs = glob(
+        [
+            "Sources/**/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    copts = [
+        "-suppress-warnings",
+    ],
+    module_name = "SnapshotTesting",
+    visibility = ["//visibility:public"],
+)
+        """,
+        sha256 = "fc37a90810c9ea402ab5612b4942ad1a22ae8105bbdd36cc64e0912343ad4a90",
+        strip_prefix = "swift-snapshot-testing-%s" % SWIFT_SNAPSHOT_TESTING_GIT_SHA,
+        url = "https://github.com/pointfreeco/swift-snapshot-testing/archive/%s.zip" % SWIFT_SNAPSHOT_TESTING_GIT_SHA,
     )

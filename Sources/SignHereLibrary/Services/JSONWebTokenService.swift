@@ -1,8 +1,8 @@
 //
 //  JSONWebTokenService.swift
-//  iTunesConnectLibrary
+//  Services
 //
-//  Created by Maxwell Elliott on 03/28/23.
+//  Created by Maxwell Elliott on 04/24/23.
 //
 
 import CoreLibrary

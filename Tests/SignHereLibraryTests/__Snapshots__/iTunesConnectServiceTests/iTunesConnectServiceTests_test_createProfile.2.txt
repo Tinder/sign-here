@@ -1,0 +1,13 @@
+▿ CreateProfileResponse
+  ▿ data: CreateProfileResponseData
+    ▿ attributes: Attributes
+      - createdDate: 1970-01-01T00:00:00Z
+      - expirationDate: 1970-01-01T00:01:40Z
+      - name: "createdProfileName"
+      - platform: "platform"
+      - profileContent: "dGVzdAo="
+      - profileState: "profileState"
+      - profileType: "profileType"
+      - uuid: "uuid"
+    - id: "createdProfileITCID"
+    - type: "type"

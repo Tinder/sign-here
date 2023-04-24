@@ -1,0 +1,38 @@
+▿ 3 elements
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 6 elements
+      - "/opensslPath"
+      - "rsa"
+      - "-noout"
+      - "-modulus"
+      - "-in"
+      - "/privateKeyPath"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 8 elements
+      - "/opensslPath"
+      - "x509"
+      - "-inform"
+      - "der"
+      - "-noout"
+      - "-modulus"
+      - "-in"
+      - "/unique_temporary_path_1/validate_private_key.cer"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 8 elements
+      - "/opensslPath"
+      - "x509"
+      - "-inform"
+      - "der"
+      - "-noout"
+      - "-modulus"
+      - "-in"
+      - "/unique_temporary_path_2/validate_private_key.cer"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none

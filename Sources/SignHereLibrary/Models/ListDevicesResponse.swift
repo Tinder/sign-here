@@ -1,6 +1,6 @@
 //
 //  ListDevicesResponse.swift
-//  iTunesConnectLibrary
+//  Models
 //
 //  Created by Maxwell Elliott on 04/04/23.
 //

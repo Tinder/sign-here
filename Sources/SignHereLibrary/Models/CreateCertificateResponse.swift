@@ -1,6 +1,6 @@
 //
 //  CreateCertificateResponse.swift
-//  iTunesConnectLibrary
+//  Models
 //
 //  Created by Maxwell Elliott on 03/31/23.
 //

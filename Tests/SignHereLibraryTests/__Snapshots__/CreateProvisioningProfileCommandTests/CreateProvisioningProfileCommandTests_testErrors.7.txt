@@ -1,0 +1,5 @@
+[CreateProvisioningProfileCommand] Unable to import P12 identity into keychain
+- Keychain Name: keychainName
+- P12 Identity: /p12Identity
+- Output: output
+- Error: errorOutput

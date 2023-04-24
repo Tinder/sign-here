@@ -1,0 +1,4 @@
+[CreateProvisioningProfileCommand] Unable to import Apple Intermediate Certificate
+- Certificate: /certificate
+- Output: output
+- Error: errorOutput

@@ -1,0 +1,3 @@
+[CreateProvisioningProfileCommand] Unable to create certificate signing request
+- Output: output
+- Error: errorOutput

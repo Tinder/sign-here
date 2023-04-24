@@ -1,6 +1,6 @@
 //
 //  JSONWebTokenHeader.swift
-//  iTunesConnectLibrary
+//  Models
 //
 //  Created by Maxwell Elliott on 03/28/23.
 //

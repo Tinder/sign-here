@@ -1,0 +1,2 @@
+[iTunesConnectServiceImp] Invalid url
+- url string: string

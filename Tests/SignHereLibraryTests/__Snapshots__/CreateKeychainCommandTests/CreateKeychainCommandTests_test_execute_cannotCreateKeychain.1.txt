@@ -1,0 +1,11 @@
+▿ 1 element
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 5 elements
+      - "security"
+      - "create-keychain"
+      - "-p"
+      - "keychainPassword"
+      - "keychainName"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none

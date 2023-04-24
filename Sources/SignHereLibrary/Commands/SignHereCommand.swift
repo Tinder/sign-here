@@ -1,8 +1,8 @@
 //
 //  SignHereCommand.swift
-//  SignHereLibrary
+//  Commands
 //
-//  Created by Maxwell Elliott on 04/19/23.
+//  Created by Maxwell Elliott on 04/24/23.
 //
 
 import ArgumentParser
@@ -16,7 +16,8 @@ public struct SignHereCommand: ParsableCommand {
             subcommands: [
                 CreateKeychainCommand.self,
                 DeleteKeychainCommand.self,
-                DeleteProvisioningProfileCommand.self
+                DeleteProvisioningProfileCommand.self,
+                CreateProvisioningProfileCommand.self
             ]
         )
 

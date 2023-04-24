@@ -1,0 +1,2 @@
+[iTunesConnectServiceImp] Unable to determine iTunesConnect API ID for bundle identifier
+- Bundle Identifier: bundleIdentifier

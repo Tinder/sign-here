@@ -40,3 +40,7 @@ load(
 )
 
 sign_here_dependencies()
+
+load("@com_github_keith_swift_syntax_bazel//:deps.bzl", "swift_syntax_deps")
+
+swift_syntax_deps()

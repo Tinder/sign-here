@@ -1,0 +1,2 @@
+[CreateProvisioningProfileCommand] Unable to base 64 decode profile
+- Profile name: name
