@@ -167,7 +167,7 @@ bazel test //Tests/...
 ---
 
 ```text
-Copyright (c) 202, Match Group, LLC
+Copyright (c) 2023, Match Group, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
