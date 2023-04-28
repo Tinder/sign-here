@@ -21,6 +21,20 @@ internal protocol JSONWebTokenService {
 }
 
 internal class JSONWebTokenServiceImp: JSONWebTokenService {
+    internal enum Error: Swift.Error, CustomStringConvertible {
+        case unableToCreateKeyString
+        case unableToCreatePrivateKey
+
+        var description: String {
+            switch self {
+            case .unableToCreateKeyString:
+                return "[JSONWebTokenService] Unable to create key string"
+            case .unableToCreatePrivateKey:
+                return "[JSONWebTokenService] Unable to create private key"
+            }
+        }
+    }
+
     private let clock: Clock
 
     init(clock: Clock) {
@@ -61,12 +75,12 @@ internal class JSONWebTokenServiceImp: JSONWebTokenService {
 
     private func createSignedHeaderPayload(data: Data, secretKey: Data) throws -> String {
         guard let keyString = String(data: secretKey, encoding: .utf8) else {
-            fatalError()
+            throw Error.unableToCreateKeyString
         }
         let privateKey: ECPrivateKey = try .init(key: keyString)
         guard privateKey.curve == .prime256v1
         else {
-            fatalError()
+            throw Error.unableToCreatePrivateKey
         }
         let signedData: ECSignature = try data.sign(with: privateKey)
         return urlBase64Encode(data: signedData.r + signedData.s)
