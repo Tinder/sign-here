@@ -153,7 +153,20 @@ chmod +x sign-here
 WORKSPACE
 
 ```python
-WIP
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_github_tinder_sign_here",
+    url = "URL",
+    sha256 = "FIX_ME",
+)
+
+load(
+    "@com_github_tinder_sign_here//:repositories.bzl",
+    "sign_here_dependencies",
+)
+
+sign_here_dependencies()
 ```
 
 ### Running the tests
