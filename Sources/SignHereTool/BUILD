@@ -8,6 +8,9 @@ swift_binary(
     srcs = [
         "main.swift",
     ],
+    visibility = [
+        "//visibility:public",
+    ],
     deps = [
         "//Sources/SignHereLibrary",
     ],
