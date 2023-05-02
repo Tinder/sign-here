@@ -5,8 +5,13 @@ allows users to automate the creation of certificates and provisioning profiles 
 
 ## Prerequisites
 
-* Bazel
-* OpenSSL
+* Bazel (Tested with Bazel 6.0)
+* OpenSSL (tested with LibreSSL 3.3.6)
+
+## Limitations
+
+sign-here cannot be used to generate certificates for Enterprise based accounts. This is a [known limitation
+of the iTunes Connect API](https://developer.apple.com/forums/thread/117282).
 
 ## Getting Started
 
