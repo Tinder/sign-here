@@ -35,6 +35,8 @@ final class iTunesConnectServiceTests: XCTestCase {
             shell: shell,
             clock: clock
         )
+
+        isRecording = false
     }
 
     override func tearDown() {
@@ -148,10 +150,9 @@ final class iTunesConnectServiceTests: XCTestCase {
             matching: shell.executeLaunchPathArgValues,
             as: .dump
         )
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         assertSnapshot(
             matching: value,
             as: .dump
@@ -199,10 +200,9 @@ final class iTunesConnectServiceTests: XCTestCase {
             matching: shell.executeLaunchPathArgValues,
             as: .dump
         )
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         assertSnapshot(
             matching: value,
             as: .dump
@@ -253,10 +253,9 @@ final class iTunesConnectServiceTests: XCTestCase {
             matching: shell.executeLaunchPathArgValues,
             as: .dump
         )
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_fetchActiveCertificates_privateKeyDoesNotMatch() throws {
@@ -298,10 +297,9 @@ final class iTunesConnectServiceTests: XCTestCase {
             matching: shell.executeLaunchPathArgValues,
             as: .dump
         )
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         XCTAssertTrue(value.isEmpty)
     }
 
@@ -329,10 +327,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         assertSnapshot(
             matching: value,
             as: .dump
@@ -367,10 +364,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         }
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_determineBundleIdITCId() throws {
@@ -390,10 +386,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         XCTAssertEqual(value, "bundleIDITCId")
     }
 
@@ -418,10 +413,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         }
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_fetchITCDeviceIDs() throws {
@@ -440,10 +434,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         XCTAssertEqual(value.sorted(), ["deviceITCId"])
     }
 
@@ -467,10 +460,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         }
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_fetchITCDeviceIDs_paged() throws {
@@ -490,10 +482,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         XCTAssertEqual(value.sorted(), ["deviceITCId"])
     }
 
@@ -517,10 +508,38 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
 
         // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         assertSnapshot(
-            matching: network.executeArgValues,
+            matching: value,
             as: .dump
         )
+    }
+
+    func test_createProfile_iosAppStoreProfile() throws {
+        // GIVEN
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createCreateProfileResponse()),
+        ]
+        network.executeHandler = { _ in
+            return networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        let value: CreateProfileResponse = try subject.createProfile(
+            jsonWebToken: "jsonWebToken",
+            bundleId: "bundleId",
+            certificateId: "certificateId",
+            deviceIDs: .init(["deviceId"]),
+            profileType: "IOS_APP_STORE"
+        )
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
         assertSnapshot(
             matching: value,
             as: .dump
@@ -551,10 +570,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         }
 
         // THEN
-        assertSnapshot(
-            matching: network.executeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_deleteProfile() throws {
@@ -570,10 +588,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
 
         // THEN
-        assertSnapshot(
-            matching: network.executeWithStatusCodeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeWithStatusCodeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_deleteProfile_failure() {
@@ -595,10 +612,9 @@ final class iTunesConnectServiceTests: XCTestCase {
         }
 
         // THEN
-        assertSnapshot(
-            matching: network.executeWithStatusCodeArgValues,
-            as: .dump
-        )
+        for argValue in network.executeWithStatusCodeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     private func createJSONEncoder() -> JSONEncoder {
