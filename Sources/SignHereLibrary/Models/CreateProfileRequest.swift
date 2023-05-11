@@ -41,7 +41,7 @@ internal struct CreateProfileRequest: Codable {
 
             var bundleId: BundleId
             var certificates: Certificates
-            var devices: Devices
+            var devices: Devices?
         }
 
         var attributes: Attributes

@@ -1,0 +1,7 @@
+curl \
+	--request POST \
+	--header "Accept: application/json" \
+	--header "Authorization: Bearer jsonWebToken" \
+	--header "Content-Type: application/json" \
+	--data "{\"data\":{\"attributes\":{\"name\":\"certificateId_IOS_APP_STORE_0.0\",\"profileType\":\"IOS_APP_STORE\"},\"type\":\"profiles\",\"relationships\":{\"certificates\":{\"data\":[{\"id\":\"certificateId\",\"type\":\"certificates\"}]},\"bundleId\":{\"data\":{\"id\":\"bundleId\",\"type\":\"bundleIds\"}}}}}" \
+	"https://api.appstoreconnect.apple.com/v1/profiles"

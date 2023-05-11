@@ -334,6 +334,18 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "POST"
         let profileName: String = "\(certificateId)_\(profileType)_\(clock.now().timeIntervalSince1970)"
+        var devices: CreateProfileRequest.CreateProfileRequestData.Relationships.Devices? = nil
+        // ME: App Store profiles cannot use UDIDs
+        if !["IOS_APP_STORE", "MAC_APP_STORE", "TVOS_APP_STORE", "MAC_CATALYST_APP_STORE"].contains(profileType) {
+            devices = .init(
+                data: deviceIDs.sorted().map {
+                    CreateProfileRequest.CreateProfileRequestData.Relationships.Devices.DevicesData(
+                        id: $0,
+                        type: "devices"
+                    )
+                }
+            )
+        }
         request.httpBody = try JSONEncoder().encode(CreateProfileRequest(
             data: .init(
                 attributes: .init(
@@ -355,14 +367,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                             )
                         ]
                     ),
-                    devices: .init(
-                        data: deviceIDs.sorted().map {
-                            .init(
-                                id: $0,
-                                type: "devices"
-                            )
-                        }
-                    )
+                    devices: devices
                 ),
                 type: "profiles"
             )
