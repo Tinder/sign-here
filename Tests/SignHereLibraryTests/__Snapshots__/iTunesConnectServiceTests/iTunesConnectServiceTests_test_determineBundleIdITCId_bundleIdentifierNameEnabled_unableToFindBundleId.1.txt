@@ -1,0 +1,5 @@
+curl \
+	--header "Accept: application/json" \
+	--header "Authorization: Bearer jsonWebToken" \
+	--header "Content-Type: application/json" \
+	"https://api.appstoreconnect.apple.com/v1/bundleIds?filter%5Bidentifier%5D=bundleIdentifier&filter%5Bplatform%5D=IOS&limit=200"

@@ -113,6 +113,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case keychainName = "keychainName"
         case keychainPassword = "keychainPassword"
         case bundleIdentifier = "bundleIdentifier"
+        case bundleIdentifierName = "bundleIdentifierName"
         case profileType = "profileType"
         case certificateType = "certificateType"
         case outputPath = "outputPath"
@@ -141,6 +142,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
 
     @Option(help: "The bundle identifier of the app for which you want to generate a provisioning profile for")
     internal var bundleIdentifier: String
+
+    @Option(help: "The bundle identifier name for the desired bundle identifier, this is optional but if it is not set the logic will select the first bundle id it finds that matches `--bundle-identifier`")
+    internal var bundleIdentifierName: String?
 
     @Option(help: "The profile type which you wish to create (https://developer.apple.com/documentation/appstoreconnectapi/profilecreaterequest/data/attributes)")
     internal var profileType: String
@@ -213,7 +217,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         outputPath: String,
         opensslPath: String,
         intermediaryAppleCertificates: [String],
-        certificateSigningRequestSubject: String
+        certificateSigningRequestSubject: String,
+        bundleIdentifierName: String?
     ) {
         self.files = files
         self.log = log
@@ -234,6 +239,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.opensslPath = opensslPath
         self.intermediaryAppleCertificates = intermediaryAppleCertificates
         self.certificateSigningRequestSubject = certificateSigningRequestSubject
+        self.bundleIdentifierName = bundleIdentifierName
     }
 
     internal init(from decoder: Decoder) throws {
@@ -265,7 +271,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             outputPath: try container.decode(String.self, forKey: .outputPath),
             opensslPath: try container.decode(String.self, forKey: .opensslPath),
             intermediaryAppleCertificates: try container.decodeIfPresent([String].self, forKey: .intermediaryAppleCertificates) ?? [],
-            certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject)
+            certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject),
+            bundleIdentifierName: try container.decodeIfPresent(String.self, forKey: .bundleIdentifierName)
         )
     }
 
@@ -295,7 +302,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             jsonWebToken: jsonWebToken,
             bundleId: try iTunesConnectService.determineBundleIdITCId(
                 jsonWebToken: jsonWebToken,
-                bundleIdentifier: bundleIdentifier
+                bundleIdentifier: bundleIdentifier,
+                bundleIdentifierName: bundleIdentifierName
             ),
             certificateId: certificateId,
             deviceIDs: deviceIDs,

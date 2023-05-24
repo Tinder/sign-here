@@ -382,7 +382,8 @@ final class iTunesConnectServiceTests: XCTestCase {
         // WHEN
         let value: String = try subject.determineBundleIdITCId(
             jsonWebToken: "jsonWebToken",
-            bundleIdentifier: "bundleIdentifier"
+            bundleIdentifier: "bundleIdentifier",
+            bundleIdentifierName: nil
         )
 
         // THEN
@@ -390,6 +391,58 @@ final class iTunesConnectServiceTests: XCTestCase {
             assertSnapshot(matching: argValue, as: .curl)
         }
         XCTAssertEqual(value, "bundleIDITCId")
+    }
+
+    func test_determineBundleIdITCId_bundleIdentifierNameEnabled() throws {
+        // GIVEN
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createListBundleIDsResponse()),
+        ]
+        network.executeHandler = { _ in
+            return networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        let value: String = try subject.determineBundleIdITCId(
+            jsonWebToken: "jsonWebToken",
+            bundleIdentifier: "bundleIdentifier",
+            bundleIdentifierName: "name"
+        )
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
+        XCTAssertEqual(value, "bundleIDITCId")
+    }
+
+    func test_determineBundleIdITCId_bundleIdentifierNameEnabled_unableToFindBundleId() throws {
+        // GIVEN
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createListBundleIDsResponse()),
+        ]
+        network.executeHandler = { _ in
+            return networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        XCTAssertThrowsError(try subject.determineBundleIdITCId(
+            jsonWebToken: "jsonWebToken",
+            bundleIdentifier: "bundleIdentifier",
+            bundleIdentifierName: "invalid"
+        )) {
+            if case iTunesConnectServiceImp.Error.unableToDetermineITCIdForBundleId = $0 {
+                return
+            }
+            XCTFail($0.localizedDescription)
+        }
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
     }
 
     func test_determineBundleIdITCId_unableToDecode() throws {
@@ -404,7 +457,8 @@ final class iTunesConnectServiceTests: XCTestCase {
         // WHEN
         XCTAssertThrowsError(try subject.determineBundleIdITCId(
             jsonWebToken: "jsonWebToken",
-            bundleIdentifier: "bundleIdentifier"
+            bundleIdentifier: "bundleIdentifier",
+            bundleIdentifierName: nil
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return
