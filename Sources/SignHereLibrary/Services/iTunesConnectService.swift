@@ -261,7 +261,6 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
     ) throws -> String {
         do {
             let listBundleIDsResponse: ListBundleIDsResponse = try createITCApiJSONDecoder().decode(ListBundleIDsResponse.self, from: data)
-            print(listBundleIDsResponse)
             guard let bundleIdITCId: String = listBundleIDsResponse.data.compactMap({ bundleData in
                 guard bundleData.attributes.identifier == bundleIdentifier,
                     bundleData.attributes.platform == "IOS"
