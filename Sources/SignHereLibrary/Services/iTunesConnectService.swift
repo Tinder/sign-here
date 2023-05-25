@@ -23,7 +23,11 @@ internal protocol iTunesConnectService {
         csr: Path,
         certificateType: String
     ) throws -> CreateCertificateResponse
-    func determineBundleIdITCId(jsonWebToken: String, bundleIdentifier: String) throws -> String
+    func determineBundleIdITCId(
+        jsonWebToken: String,
+        bundleIdentifier: String,
+        bundleIdentifierName: String?
+    ) throws -> String
     func fetchITCDeviceIDs(jsonWebToken: String) throws -> Set<String>
     func createProfile(
         jsonWebToken: String,
@@ -219,7 +223,11 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         }
     }
 
-    func determineBundleIdITCId(jsonWebToken: String, bundleIdentifier: String) throws -> String {
+    func determineBundleIdITCId(
+        jsonWebToken: String,
+        bundleIdentifier: String,
+        bundleIdentifierName: String?
+    ) throws -> String {
         var urlComponents: URLComponents = .init()
         urlComponents.scheme = Constants.httpsScheme
         urlComponents.host = Constants.itcHost
@@ -239,16 +247,31 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: Constants.contentTypeHeaderName)
         request.httpMethod = "GET"
         let data: Data = try network.execute(request: request)
-        return try makeFirstITCIdForBundleId(data: data, bundleIdentifier: bundleIdentifier)
+        return try makeFirstITCIdForBundleId(
+            data: data,
+            bundleIdentifier: bundleIdentifier,
+            bundleIdentifierName: bundleIdentifierName
+        )
     }
 
-    private func makeFirstITCIdForBundleId(data: Data, bundleIdentifier: String) throws -> String {
+    private func makeFirstITCIdForBundleId(
+        data: Data,
+        bundleIdentifier: String,
+        bundleIdentifierName: String?
+    ) throws -> String {
         do {
             let listBundleIDsResponse: ListBundleIDsResponse = try createITCApiJSONDecoder().decode(ListBundleIDsResponse.self, from: data)
             guard let bundleIdITCId: String = listBundleIDsResponse.data.compactMap({ bundleData in
-                guard bundleData.attributes.identifier == bundleIdentifier
+                guard bundleData.attributes.identifier == bundleIdentifier,
+                    bundleData.attributes.platform == "IOS"
                 else {
                     return nil
+                }
+                if let bundleIdentifierName: String = bundleIdentifierName {
+                    guard bundleIdentifierName == bundleData.attributes.name
+                    else {
+                        return nil
+                    }
                 }
                 return bundleData.id
             }).first
