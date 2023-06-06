@@ -162,7 +162,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "com_github_tinder_sign_here",
-    url = "URL",
+    url = "https://github.com/Tinder/sign-here",
     sha256 = "FIX_ME",
 )
 
