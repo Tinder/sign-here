@@ -12,7 +12,7 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
-      - run: bazelisk test //Tests/...
+      - run: bazelisk test //Tests/... --xcode_version=14.3
   executable:
     name: Build macos_command_line_application
     runs-on: macos-13
