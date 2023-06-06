@@ -9,13 +9,13 @@ on:
 jobs:
   tests:
     name: Run tests
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk test //Tests/...
   executable:
     name: Build macos_command_line_application
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64
