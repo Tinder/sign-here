@@ -22,7 +22,7 @@ swift_binary(
 
 macos_command_line_application(
     name = "sign-here-macos",
-    minimum_os_version = "12.0.0",
+    minimum_os_version = "13.0.0",
     deps = [
         ":sign-here",
     ],
