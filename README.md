@@ -20,7 +20,7 @@ To start using `sign-here` immediately, simply clone down the repo and run the t
 ```terminal
 git clone https://github.com/Tinder/sign-here.git
 cd sign-here
-bazelisk run //Sources/SignHereTool:sign-here
+bazel run //Sources/SignHereTool:sign-here
 ```
 
 Actions such as `create-keychain` and `delete-keychain` do not require iTunes Connect API access thus

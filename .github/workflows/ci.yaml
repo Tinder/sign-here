@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  tests:
+    name: Run tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: bazelisk test //Tests/...
+  executable:
+    name: Build macos_command_line_application
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sign-here
+          path: bazel-bin/Sources/SignHereTool/sign-here
+          if-no-files-found: error
