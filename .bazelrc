@@ -1,0 +1,6 @@
+build --incompatible_disallow_empty_glob
+build --apple_platform_type=macos
+build --incompatible_strict_action_env
+build --macos_minimum_os=13.0
+test --test_output=errors
+test --test_summary=detailed
