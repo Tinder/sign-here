@@ -1,6 +1,6 @@
 # sign-here
 
-A straightforward tool to allow for the creation of Provisioning Profiles and Certificates for deploying Apple based software. This tool
+A straightforward tool that allows the creation of Provisioning Profiles and Certificates for deploying Apple based software. This tool
 allows users to automate the creation of certificates and provisioning profiles in a simple to use API.
 
 ## Prerequisites
