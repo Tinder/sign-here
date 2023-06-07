@@ -383,7 +383,8 @@ final class iTunesConnectServiceTests: XCTestCase {
         let value: String = try subject.determineBundleIdITCId(
             jsonWebToken: "jsonWebToken",
             bundleIdentifier: "bundleIdentifier",
-            bundleIdentifierName: nil
+            bundleIdentifierName: nil,
+            platform: .iOS
         )
 
         // THEN
@@ -407,7 +408,8 @@ final class iTunesConnectServiceTests: XCTestCase {
         let value: String = try subject.determineBundleIdITCId(
             jsonWebToken: "jsonWebToken",
             bundleIdentifier: "bundleIdentifier",
-            bundleIdentifierName: "name"
+            bundleIdentifierName: "name",
+            platform: .iOS
         )
 
         // THEN
@@ -431,7 +433,8 @@ final class iTunesConnectServiceTests: XCTestCase {
         XCTAssertThrowsError(try subject.determineBundleIdITCId(
             jsonWebToken: "jsonWebToken",
             bundleIdentifier: "bundleIdentifier",
-            bundleIdentifierName: "invalid"
+            bundleIdentifierName: "invalid",
+            platform: .iOS
         )) {
             if case iTunesConnectServiceImp.Error.unableToDetermineITCIdForBundleId = $0 {
                 return
@@ -458,7 +461,8 @@ final class iTunesConnectServiceTests: XCTestCase {
         XCTAssertThrowsError(try subject.determineBundleIdITCId(
             jsonWebToken: "jsonWebToken",
             bundleIdentifier: "bundleIdentifier",
-            bundleIdentifierName: nil
+            bundleIdentifierName: nil,
+            platform: .iOS
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return

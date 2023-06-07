@@ -55,7 +55,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             opensslPath: "/opensslPath",
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
-            bundleIdentifierName: "bundleIdentifierName"
+            bundleIdentifierName: "bundleIdentifierName",
+            platform: .iOS
         )
     }
 
