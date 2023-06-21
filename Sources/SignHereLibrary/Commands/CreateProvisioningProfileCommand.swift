@@ -151,10 +151,10 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     internal var platform: Platform
 
     @Option(help: "The profile type which you wish to create (https://developer.apple.com/documentation/appstoreconnectapi/profilecreaterequest/data/attributes)")
-    internal var profileType: String
+    internal var profileType: ProfileType
 
     @Option(help: "The certificate type which you wish to create (https://developer.apple.com/documentation/appstoreconnectapi/certificatetype)")
-    internal var certificateType: String
+    internal var certificateType: CertificateType
 
     @Option(help: "Where to save the created provisioning profile")
     internal var outputPath: String
@@ -216,8 +216,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         keychainName: String,
         keychainPassword: String,
         bundleIdentifier: String,
-        profileType: String,
-        certificateType: String,
+        profileType: ProfileType,
+        certificateType: CertificateType,
         outputPath: String,
         opensslPath: String,
         intermediaryAppleCertificates: [String],
@@ -272,8 +272,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             keychainName: try container.decode(String.self, forKey: .keychainName),
             keychainPassword: try container.decode(String.self, forKey: .keychainPassword),
             bundleIdentifier: try container.decode(String.self, forKey: .bundleIdentifier),
-            profileType: try container.decode(String.self, forKey: .profileType),
-            certificateType: try container.decode(String.self, forKey: .certificateType),
+            profileType: try container.decode(ProfileType.self, forKey: .profileType),
+            certificateType: try container.decode(CertificateType.self, forKey: .certificateType),
             outputPath: try container.decode(String.self, forKey: .outputPath),
             opensslPath: try container.decode(String.self, forKey: .opensslPath),
             intermediaryAppleCertificates: try container.decodeIfPresent([String].self, forKey: .intermediaryAppleCertificates) ?? [],
@@ -304,7 +304,10 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         try importP12IdentityIntoKeychain(p12Identity: p12Identity, identityPassword: identityPassword)
         try importIntermediaryAppleCertificates()
         try updateKeychainPartitionList()
-        let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(jsonWebToken: jsonWebToken)
+        let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(
+            jsonWebToken: jsonWebToken,
+            platform: platform
+        )
         let profileResponse: CreateProfileResponse = try iTunesConnectService.createProfile(
             jsonWebToken: jsonWebToken,
             bundleId: try iTunesConnectService.determineBundleIdITCId(

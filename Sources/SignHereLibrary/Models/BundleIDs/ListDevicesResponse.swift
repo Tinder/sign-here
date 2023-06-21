@@ -14,7 +14,7 @@ internal struct ListDevicesResponse: Codable {
             var model: String?
             var name: String
             var platform: String
-            var status: String
+            var status: Status
             var udid: String
             var addedDate: Date
         }

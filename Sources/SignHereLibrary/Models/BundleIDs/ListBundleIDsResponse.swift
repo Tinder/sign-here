@@ -10,7 +10,7 @@ internal struct ListBundleIDsResponse: Codable {
         struct Attributes: Codable {
             var name: String
             var identifier: String
-            var platform: String
+            var platform: Platform
         }
 
         var id: String

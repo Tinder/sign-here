@@ -16,12 +16,12 @@ internal protocol iTunesConnectService {
         jsonWebToken: String,
         opensslPath: String,
         privateKeyPath: String,
-        certificateType: String
+        certificateType: CertificateType
     ) throws -> [DownloadCertificateResponse.DownloadCertificateResponseData]
     func createCertificate(
         jsonWebToken: String,
         csr: Path,
-        certificateType: String
+        certificateType: CertificateType
     ) throws -> CreateCertificateResponse
     func determineBundleIdITCId(
         jsonWebToken: String,
@@ -29,13 +29,16 @@ internal protocol iTunesConnectService {
         bundleIdentifierName: String?,
         platform: Platform
     ) throws -> String
-    func fetchITCDeviceIDs(jsonWebToken: String) throws -> Set<String>
+    func fetchITCDeviceIDs(
+        jsonWebToken: String,
+        platform: Platform
+    ) throws -> Set<String>
     func createProfile(
         jsonWebToken: String,
         bundleId: String,
         certificateId: String,
         deviceIDs: Set<String>,
-        profileType: String
+        profileType: ProfileType
     ) throws -> CreateProfileResponse
     func deleteProvisioningProfile(
         jsonWebToken: String,
@@ -132,7 +135,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         jsonWebToken: String,
         opensslPath: String,
         privateKeyPath: String,
-        certificateType: String
+        certificateType: CertificateType
     ) throws -> [DownloadCertificateResponse.DownloadCertificateResponseData] {
         let currentDate: Date = clock.now()
         var urlComponents: URLComponents = .init()
@@ -140,7 +143,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         urlComponents.host = Constants.itcHost
         urlComponents.path = "/v1/certificates"
         urlComponents.queryItems = [
-            .init(name: "filter[certificateType]", value: certificateType),
+            .init(name: "filter[certificateType]", value: certificateType.rawValue),
             .init(name: "limit", value: "200")
         ]
         guard let url: URL = urlComponents.url
@@ -190,7 +193,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
     func createCertificate(
         jsonWebToken: String,
         csr: Path,
-        certificateType: String
+        certificateType: CertificateType
     ) throws -> CreateCertificateResponse {
         let urlString: String = "https://api.appstoreconnect.apple.com/v1/certificates"
         guard let url: URL = .init(string: urlString)
@@ -265,7 +268,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
             let listBundleIDsResponse: ListBundleIDsResponse = try createITCApiJSONDecoder().decode(ListBundleIDsResponse.self, from: data)
             guard let bundleIdITCId: String = listBundleIDsResponse.data.compactMap({ bundleData in
                 guard bundleData.attributes.identifier == bundleIdentifier,
-                    bundleData.attributes.platform == "IOS"
+                    bundleData.attributes.platform == .iOS
                 else {
                     return nil
                 }
@@ -286,14 +289,17 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         }
     }
 
-    func fetchITCDeviceIDs(jsonWebToken: String) throws -> Set<String> {
+    func fetchITCDeviceIDs(
+        jsonWebToken: String,
+        platform: Platform
+    ) throws -> Set<String> {
         var urlComponents: URLComponents = .init()
         urlComponents.scheme = Constants.httpsScheme
         urlComponents.host = Constants.itcHost
         urlComponents.path = "/v1/devices"
         urlComponents.queryItems = [
-            .init(name: "filter[status]", value: "ENABLED"),
-            .init(name: "filter[platform]", value: "IOS"),
+            .init(name: "filter[status]", value: Status.enabled.rawValue),
+            .init(name: "filter[platform]", value: platform.rawValue),
             .init(name: "limit", value: "200")
         ]
         guard let url: URL = urlComponents.url
@@ -346,7 +352,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         bundleId: String,
         certificateId: String,
         deviceIDs: Set<String>,
-        profileType: String
+        profileType: ProfileType
     ) throws -> CreateProfileResponse {
         let urlString: String = "https://api.appstoreconnect.apple.com/v1/profiles"
         guard let url: URL = .init(string: urlString)
@@ -361,7 +367,9 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         let profileName: String = "\(certificateId)_\(profileType)_\(clock.now().timeIntervalSince1970)"
         var devices: CreateProfileRequest.CreateProfileRequestData.Relationships.Devices? = nil
         // ME: App Store profiles cannot use UDIDs
-        if !["IOS_APP_STORE", "MAC_APP_STORE", "TVOS_APP_STORE", "MAC_CATALYST_APP_STORE"].contains(profileType) {
+        if Store.allCases
+        .map(\.rawValue)
+        .contains(profileType.rawValue) {
             devices = .init(
                 data: deviceIDs.sorted().map {
                     CreateProfileRequest.CreateProfileRequestData.Relationships.Devices.DevicesData(

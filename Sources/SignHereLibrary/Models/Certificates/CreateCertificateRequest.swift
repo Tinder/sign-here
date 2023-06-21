@@ -8,7 +8,7 @@
 internal struct CreateCertificateRequest: Codable {
     struct CreateCertificateRequestData: Codable {
         struct CreateCertificateRequestAttributes: Codable {
-            var certificateType: String
+            var certificateType: CertificateType
             var csrContent: String
         }
 
