@@ -26,7 +26,8 @@ internal protocol iTunesConnectService {
     func determineBundleIdITCId(
         jsonWebToken: String,
         bundleIdentifier: String,
-        bundleIdentifierName: String?
+        bundleIdentifierName: String?,
+        platform: Platform
     ) throws -> String
     func fetchITCDeviceIDs(jsonWebToken: String) throws -> Set<String>
     func createProfile(
@@ -226,7 +227,8 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
     func determineBundleIdITCId(
         jsonWebToken: String,
         bundleIdentifier: String,
-        bundleIdentifierName: String?
+        bundleIdentifierName: String?,
+        platform: Platform
     ) throws -> String {
         var urlComponents: URLComponents = .init()
         urlComponents.scheme = Constants.httpsScheme
@@ -234,7 +236,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         urlComponents.path = "/v1/bundleIds"
         urlComponents.queryItems = [
             .init(name: "filter[identifier]", value: bundleIdentifier),
-            .init(name: "filter[platform]", value: "IOS"),
+            .init(name: "filter[platform]", value: platform.rawValue),
             .init(name: "limit", value: "200")
         ]
         guard let url: URL = urlComponents.url
