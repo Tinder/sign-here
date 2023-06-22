@@ -49,8 +49,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             keychainName: "keychainName",
             keychainPassword: "keychainPassword",
             bundleIdentifier: "bundleIdentifier",
-            profileType: "profileType",
-            certificateType: "certificateType",
+            profileType: .iOSAppStore,
+            certificateType: .iOSDistribution,
             outputPath: "/outputPath",
             opensslPath: "/opensslPath",
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
@@ -58,6 +58,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             bundleIdentifierName: "bundleIdentifierName",
             platform: .iOS
         )
+
+        isRecording = false
     }
 
     override func tearDown() {
@@ -153,8 +155,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "keychainName": "keychainName",
             "keychainPassword": "keychainPassword",
             "bundleIdentifier": "bundleIdentifier",
-            "profileType": "profileType",
-            "certificateType": "certificateType",
+            "profileType": "IOS_APP_STORE",
+            "certificateType": "IOS_DISTRIBUTION",
             "outputPath": "/outputPath",
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
@@ -174,8 +176,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.keychainName, "keychainName")
         XCTAssertEqual(subject.keychainPassword, "keychainPassword")
         XCTAssertEqual(subject.bundleIdentifier, "bundleIdentifier")
-        XCTAssertEqual(subject.profileType, "profileType")
-        XCTAssertEqual(subject.certificateType, "certificateType")
+        XCTAssertEqual(subject.profileType, .iOSAppStore)
+        XCTAssertEqual(subject.certificateType, .iOSDistribution)
         XCTAssertEqual(subject.outputPath, "/outputPath")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, .iOS)
@@ -277,7 +279,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
                     id: "activeCertID",
                     attributes: DownloadCertificateResponse.DownloadCertificateResponseData.DownloadCertificateResponseDataAttributes(
                         certificateContent: "dGVzdAo=",
-                        certificateType: "certificateType",
+                        certificateType: .iOSDistribution,
                         expirationDate: .init(timeIntervalSince1970: 100),
                         displayName: "activeCertDisplayName"
                     )
@@ -308,7 +310,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
                     certificateContent: "dGVzdAo=",
                     displayName: "createdCertDisplayName",
                     name: "createdCertName",
-                    certificateType: "certificateType",
+                    certificateType: .iOSDistribution,
                     serialNumber: "createdCertSerialNumber"
                 )
             )
@@ -324,10 +326,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
                     profileContent: "dGVzdAo=",
                     uuid: "uuid",
                     name: "createdProfileName",
-                    platform: "platform",
+                    platform: .iOS,
                     createdDate: .init(),
-                    profileState: "profileState",
-                    profileType: "profileType",
+                    profileState: .active,
+                    profileType: .iOSAppStore,
                     expirationDate: .init(timeIntervalSince1970: 100)
                 )
             )

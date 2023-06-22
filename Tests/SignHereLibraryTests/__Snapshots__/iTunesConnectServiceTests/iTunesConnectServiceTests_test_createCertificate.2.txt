@@ -2,7 +2,7 @@
   ▿ data: CreateCertificateData
     ▿ attributes: CreateCertificateResponseAttributes
       - certificateContent: "dGVzdAo="
-      - certificateType: "certificateType"
+      - certificateType: CertificateType.iOSDistribution
       - displayName: "createdCertDisplayName"
       - name: "createdCertName"
       - serialNumber: "createdCertSerialNumber"

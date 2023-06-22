@@ -13,10 +13,10 @@ internal struct CreateProfileResponse: Codable {
             var profileContent: String
             var uuid: String
             var name: String
-            var platform: String
+            var platform: Platform
             var createdDate: Date
-            var profileState: String
-            var profileType: String
+            var profileState: ProfileState
+            var profileType: ProfileType
             var expirationDate: Date
         }
         var id: String

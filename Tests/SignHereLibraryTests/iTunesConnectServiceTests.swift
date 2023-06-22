@@ -142,7 +142,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             jsonWebToken: "jsonWebToken",
             opensslPath: "/opensslPath",
             privateKeyPath: "/privateKeyPath",
-            certificateType: "certificateType"
+            certificateType: .iOSDistribution
         )
 
         // THEN
@@ -192,7 +192,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             jsonWebToken: "jsonWebToken",
             opensslPath: "/opensslPath",
             privateKeyPath: "/privateKeyPath",
-            certificateType: "certificateType"
+            certificateType: .iOSDistribution
         )
 
         // THEN
@@ -240,7 +240,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             jsonWebToken: "jsonWebToken",
             opensslPath: "/opensslPath",
             privateKeyPath: "/privateKeyPath",
-            certificateType: "certificateType"
+            certificateType: .iOSDistribution
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return
@@ -289,7 +289,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             jsonWebToken: "jsonWebToken",
             opensslPath: "/opensslPath",
             privateKeyPath: "/privateKeyPath",
-            certificateType: "certificateType"
+            certificateType: .iOSDistribution
         )
 
         // THEN
@@ -323,7 +323,7 @@ final class iTunesConnectServiceTests: XCTestCase {
         let value: CreateCertificateResponse = try subject.createCertificate(
             jsonWebToken: "jsonWebToken",
             csr: "/csr",
-            certificateType: "certificateType"
+            certificateType: .iOSDistribution
         )
 
         // THEN
@@ -355,7 +355,7 @@ final class iTunesConnectServiceTests: XCTestCase {
         XCTAssertThrowsError(try subject.createCertificate(
             jsonWebToken: "jsonWebToken",
             csr: "/csr",
-            certificateType: "certificateType"
+            certificateType: .iOSDistribution
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return
@@ -488,7 +488,8 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // WHEN
         let value: Set<String> = try subject.fetchITCDeviceIDs(
-            jsonWebToken: "jsonWebToken"
+            jsonWebToken: "jsonWebToken",
+            platform: .iOS
         )
 
         // THEN
@@ -509,7 +510,8 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // WHEN
         XCTAssertThrowsError(try subject.fetchITCDeviceIDs(
-            jsonWebToken: "jsonWebToken"
+            jsonWebToken: "jsonWebToken",
+            platform: .iOS
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return
@@ -536,7 +538,8 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // WHEN
         let value: Set<String> = try subject.fetchITCDeviceIDs(
-            jsonWebToken: "jsonWebToken"
+            jsonWebToken: "jsonWebToken",
+            platform: .iOS
         )
 
         // THEN
@@ -562,7 +565,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             bundleId: "bundleId",
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
-            profileType: "profileType"
+            profileType: .iOSAppStore
         )
 
         // THEN
@@ -591,7 +594,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             bundleId: "bundleId",
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
-            profileType: "IOS_APP_STORE"
+            profileType: .iOSAppStore
         )
 
         // THEN
@@ -619,7 +622,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             bundleId: "bundleId",
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
-            profileType: "profileType"
+            profileType: .iOSAppStore
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return
@@ -690,7 +693,7 @@ final class iTunesConnectServiceTests: XCTestCase {
                     id: "activeCertID",
                     attributes: DownloadCertificateResponse.DownloadCertificateResponseData.DownloadCertificateResponseDataAttributes(
                         certificateContent: "dGVzdAo=",
-                        certificateType: "certificateType",
+                        certificateType: .iOSDistribution,
                         expirationDate: .init(timeIntervalSince1970: 100),
                         displayName: "activeCertDisplayName"
                     )
@@ -721,7 +724,7 @@ final class iTunesConnectServiceTests: XCTestCase {
                     certificateContent: "dGVzdAo=",
                     displayName: "createdCertDisplayName",
                     name: "createdCertName",
-                    certificateType: "certificateType",
+                    certificateType: .iOSDistribution,
                     serialNumber: "createdCertSerialNumber"
                 )
             )
@@ -738,8 +741,8 @@ final class iTunesConnectServiceTests: XCTestCase {
                         deviceClass: "deviceClass",
                         model: "model",
                         name: "name",
-                        platform: "platform",
-                        status: "status",
+                        platform: .iOS,
+                        status: .enabled,
                         udid: "udid",
                         addedDate: .init()
                     )
@@ -761,7 +764,7 @@ final class iTunesConnectServiceTests: XCTestCase {
                     attributes: ListBundleIDsResponse.BundleId.Attributes(
                         name: "name",
                         identifier: "bundleIdentifier",
-                        platform: "IOS"
+                        platform: .iOS
                     )
                 )
             ]
@@ -777,10 +780,10 @@ final class iTunesConnectServiceTests: XCTestCase {
                     profileContent: "dGVzdAo=",
                     uuid: "uuid",
                     name: "createdProfileName",
-                    platform: "platform",
+                    platform: .iOS,
                     createdDate: .init(timeIntervalSince1970: 0),
-                    profileState: "profileState",
-                    profileType: "profileType",
+                    profileState: .active,
+                    profileType: .iOSAppStore,
                     expirationDate: .init(timeIntervalSince1970: 100)
                 )
             )

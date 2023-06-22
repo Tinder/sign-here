@@ -4,10 +4,10 @@
       - createdDate: 1970-01-01T00:00:00Z
       - expirationDate: 1970-01-01T00:01:40Z
       - name: "createdProfileName"
-      - platform: "platform"
+      - platform: Platform.iOS
       - profileContent: "dGVzdAo="
-      - profileState: "profileState"
-      - profileType: "profileType"
+      - profileState: ProfileState.active
+      - profileType: ProfileType.iOSAppStore
       - uuid: "uuid"
     - id: "createdProfileITCID"
     - type: "type"
