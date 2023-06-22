@@ -67,6 +67,5 @@ public func assertSnapshot<Value, Format>(
       testName: "\(fileName)_\(testName)"
     )
     guard let message = failure else { return }
-    print(message)
     XCTFail(message, file: file, line: line)
 }

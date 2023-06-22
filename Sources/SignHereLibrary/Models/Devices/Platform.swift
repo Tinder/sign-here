@@ -12,4 +12,3 @@ internal enum Platform: String, Codable, ExpressibleByArgument {
     case iOS = "IOS"
     case macOS = "MAC_OS"
 }
-
