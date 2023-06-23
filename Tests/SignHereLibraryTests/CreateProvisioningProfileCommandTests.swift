@@ -55,8 +55,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             opensslPath: "/opensslPath",
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
-            bundleIdentifierName: "bundleIdentifierName",
-            platform: .iOS
+            bundleIdentifierName: "bundleIdentifierName"
         )
     }
 
@@ -158,8 +157,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "outputPath": "/outputPath",
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
-            "bundleIdentifierName": "bundleIdentifierName",
-            "platform": "IOS"
+            "bundleIdentifierName": "bundleIdentifierName"
         }
         """.utf8)
 
@@ -178,7 +176,6 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.certificateType, "certificateType")
         XCTAssertEqual(subject.outputPath, "/outputPath")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
-        XCTAssertEqual(subject.platform, .iOS)
     }
 
     func test_execute_alreadyActiveCertificate() throws {
