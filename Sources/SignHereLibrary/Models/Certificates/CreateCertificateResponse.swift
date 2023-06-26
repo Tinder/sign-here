@@ -13,7 +13,7 @@ internal struct CreateCertificateResponse: Codable {
             var certificateContent: String
             var displayName: String
             var name: String
-            var certificateType: String
+            var certificateType: CertificateType
             var serialNumber: String
         }
 

@@ -3,5 +3,5 @@ curl \
 	--header "Accept: application/json" \
 	--header "Authorization: Bearer jsonWebToken" \
 	--header "Content-Type: application/json" \
-	--data "{\"data\":{\"attributes\":{\"name\":\"certificateId_profileType_0.0\",\"profileType\":\"profileType\"},\"type\":\"profiles\",\"relationships\":{\"devices\":{\"data\":[{\"id\":\"deviceId\",\"type\":\"devices\"}]},\"certificates\":{\"data\":[{\"id\":\"certificateId\",\"type\":\"certificates\"}]},\"bundleId\":{\"data\":{\"id\":\"bundleId\",\"type\":\"bundleIds\"}}}}}" \
+	--data "{\"data\":{\"attributes\":{\"name\":\"certificateId_iOSAppStore_0.0\",\"profileType\":\"IOS_APP_STORE\"},\"type\":\"profiles\",\"relationships\":{\"devices\":{\"data\":[{\"id\":\"deviceId\",\"type\":\"devices\"}]},\"certificates\":{\"data\":[{\"id\":\"certificateId\",\"type\":\"certificates\"}]},\"bundleId\":{\"data\":{\"id\":\"bundleId\",\"type\":\"bundleIds\"}}}}}" \
 	"https://api.appstoreconnect.apple.com/v1/profiles"

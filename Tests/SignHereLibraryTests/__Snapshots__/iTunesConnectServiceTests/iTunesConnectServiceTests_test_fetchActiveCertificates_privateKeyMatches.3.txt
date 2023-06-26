@@ -2,7 +2,7 @@
   ▿ DownloadCertificateResponseData
     ▿ attributes: DownloadCertificateResponseDataAttributes
       - certificateContent: "dGVzdAo="
-      - certificateType: "certificateType"
+      - certificateType: CertificateType.iOSDistribution
       - displayName: "activeCertDisplayName"
       - expirationDate: 1970-01-01T00:01:40Z
     - id: "activeCertID"

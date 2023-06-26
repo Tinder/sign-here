@@ -11,7 +11,7 @@ internal struct DownloadCertificateResponse: Codable {
     struct DownloadCertificateResponseData: Codable {
         struct DownloadCertificateResponseDataAttributes: Codable {
             var certificateContent: String
-            var certificateType: String
+            var certificateType: CertificateType
             var expirationDate: Date
             var displayName: String
         }

@@ -9,7 +9,7 @@ internal struct CreateProfileRequest: Codable {
     struct CreateProfileRequestData: Codable {
         struct Attributes: Codable {
             var name: String
-            var profileType: String
+            var profileType: ProfileType
         }
 
         struct Relationships: Codable {
