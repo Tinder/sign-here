@@ -7,6 +7,9 @@
 
 import CoreLibrary
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import PathKit
 
 /// @mockable
