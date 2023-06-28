@@ -81,6 +81,30 @@ swift_library(
 
     _maybe(
         http_archive,
+        name = "com_github_kitura_openssl",
+        url = "https://github.com/Kitura/OpenSSL/archive/refs/tags/2.2.2.zip",
+        strip_prefix = "OpenSSL-2.2.2",
+        build_file_content = """
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_c_module")
+
+cc_library(
+  name = "shim",
+  srcs = ["Sources/OpenSSL/shim.h"],
+)
+
+swift_c_module(
+    name = "OpenSSL",
+    deps = [":shim"],
+    module_map = "Sources/OpenSSL/module.modulemap",
+    module_name = "OpenSSL",
+    visibility = ["//visibility:public"],
+)
+        """,
+        sha256 = "41a92b43a59decaa56dd093ce80c81ac1858a663d5250fe45de243905c5483cf",
+    )
+
+    _maybe(
+        http_archive,
         name = "com_github_kitura_blueecc",
         url = "https://github.com/Kitura/BlueECC/archive/b0983b04bcf3a571404392e4fee461cf3f17548b.zip",
         strip_prefix = "BlueECC-b0983b04bcf3a571404392e4fee461cf3f17548b",
@@ -92,6 +116,7 @@ swift_library(
     srcs = glob([
         "Sources/CryptorECC/**/*.swift",
     ]),
+    deps = ["@com_github_kitura_openssl//:OpenSSL"],
     copts = ["-suppress-warnings"],
     module_name = "CryptorECC",
     visibility = [
