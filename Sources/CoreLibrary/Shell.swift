@@ -117,7 +117,7 @@ public final class ShellImp: Shell {
         // (aka consumers that trigger many 'execute' invocations in a tight loop that each
         // manage a potentially large output on STDOUT and/or STDERR) will hit a memory
         // ceiling and ultimately crash. Explicit autoreleasepool ensures this doesn't happen.
-        autoreleasepool {
+        //autoreleasepool {
             let (data, errorData, terminationStatus): (Data, Data, Int32) = makeAndLaunchProcess(
                 launchPath: launchPath,
                 arguments,
@@ -126,7 +126,7 @@ public final class ShellImp: Shell {
             tempData = data
             tempErrorData = errorData
             tempTerminationStatus = Int(terminationStatus)
-        }
+        //}
         return ShellOutput(
             status: tempTerminationStatus,
             data: tempData,
