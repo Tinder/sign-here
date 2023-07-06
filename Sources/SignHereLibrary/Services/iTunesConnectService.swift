@@ -43,6 +43,12 @@ internal protocol iTunesConnectService {
         jsonWebToken: String,
         id: String
     ) throws
+    func registerDevice(
+        jsonWebToken: String,
+        platform: String,
+        name: String,
+        udid: String
+    ) throws
 }
 
 internal class iTunesConnectServiceImp: iTunesConnectService {
@@ -431,6 +437,107 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         guard tuple.statusCode == 204
         else {
             throw Error.unableToDeleteProvisioningProfile(id: id, responseData: tuple.data)
+        }
+    }
+
+    func createDevice(udid: String, completion: @escaping (Result<DevicesResponse, Error>) -> Void) {
+    struct DeviceCreateRequest: Codable {
+        struct Data: Codable {
+            let type: String
+            struct Attributes: Codable {
+                let name: String
+                let udid: String
+                let platform: String
+            }
+            let attributes: Attributes
+        }
+        let data: Data
+    }
+
+    let devicesUrl = "..." // Replace with your devices URL
+
+    guard let url = URL(string: devicesUrl) else {
+        completion(.failure(NSError(domain: "", code: 0, userInfo: nil)))
+        return
+    }
+
+    var deviceCreateRequest = DeviceCreateRequest()
+    deviceCreateRequest.data.type = "devices"
+    deviceCreateRequest.data.attributes.name = udid
+    deviceCreateRequest.data.attributes.udid = udid
+    deviceCreateRequest.data.attributes.platform = "IOS"
+
+    guard let jsonStr = try? JSONEncoder().encode(deviceCreateRequest) else {
+        completion(.failure(EncodingError.invalidValue("Failed to encode deviceCreateRequest")))
+        return
+    }
+
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.httpBody = jsonStr
+
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        guard let data = data, let response = response as? HTTPURLResponse else {
+            completion(.failure(error ?? NSError(domain: "", code: 0, userInfo: nil)))
+            return
+        }
+
+        if response.statusCode != 201 {
+            completion(.failure(NSError(domain: "", code: response.statusCode, userInfo: nil)))
+            return
+        }
+
+        do {
+            let devicesResponse = try JSONDecoder().decode(DevicesResponse.self, from: data)
+            completion(.success(devicesResponse))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    task.resume()
+}
+
+
+
+
+    func registerDevice(
+        jsonWebToken: String,
+        platform: String,
+        name: String,
+        udid: String
+    ) throws {
+        var urlComponents: URLComponents = .init()
+        urlComponents.scheme = Constants.httpsScheme
+        urlComponents.host = Constants.itcHost
+        urlComponents.path = "/v1/devices"
+
+        var deviceCreateRequest = DeviceCreateRequest()
+        deviceCreateRequest.data.type = "devices"
+        deviceCreateRequest.data.attributes.name = udid
+        deviceCreateRequest.data.attributes.udid = udid
+        deviceCreateRequest.data.attributes.platform = "IOS"
+        guard let url: URL = urlComponents.url
+        else {
+            throw Error.unableToCreateURL(urlComponents: urlComponents)
+        }
+    
+        guard let jsonStr = try? JSONEncoder().encode(deviceCreateRequest) else {
+            completion(.failure(EncodingError.invalidValue("Failed to encode deviceCreateRequest")))
+            return
+        }
+
+        var request: URLRequest = .init(url: url)
+        request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
+        request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: Constants.contentTypeHeaderName)
+        request.httpMethod = "POST"
+        let tuple: (data: Data, _, statusCode: Int) = try network.executeWithStatusCode(request: request)
+        let responseBody = String(data: tuple.data, encoding: .utf8)
+        let errorMessage = String(tuple.statusCode) + "-" + (responseBody ?? "")
+        guard tuple.statusCode == 201
+        else {
+            throw Error.invalidURL(string: errorMessage)
         }
     }
 

@@ -17,7 +17,8 @@ public struct SignHereCommand: ParsableCommand {
                 CreateKeychainCommand.self,
                 DeleteKeychainCommand.self,
                 DeleteProvisioningProfileCommand.self,
-                CreateProvisioningProfileCommand.self
+                CreateProvisioningProfileCommand.self,
+                RegisterDeviceCommand.self
             ]
         )
 
