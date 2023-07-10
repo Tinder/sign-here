@@ -54,6 +54,7 @@ internal protocol iTunesConnectService {
 internal class iTunesConnectServiceImp: iTunesConnectService {
     enum Error: Swift.Error, CustomStringConvertible {
         case invalidURL(string: String)
+        case unableToRegisterDevice(string: String)
         case unableToCreateURL(urlComponents: URLComponents)
         case unableToDetermineITCIdForBundleId(bundleIdentifier: String)
         case unableToDetermineModulusForCertificate(output: ShellOutput)
@@ -67,6 +68,11 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                 case let .invalidURL(string: string):
                     return """
                     [iTunesConnectServiceImp] Invalid url
+                    - url string: \(string)
+                    """
+                case let .unableToRegisterDevice(string: string):
+                    return """
+                    [iTunesConnectServiceImp] Unable to register device
                     - url string: \(string)
                     """
                 case let .unableToCreateURL(urlComponents: urlComponents):
@@ -490,7 +496,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
 
         let jsonEncoder = JSONEncoder()
         guard let jsonData = try? jsonEncoder.encode(requestData) else {
-            throw Error.invalidURL(string: errorMessage) // or return an appropriate error
+            throw Error.unableToRegisterDevice(string: errorMessage) // or return an appropriate error
         }
 
         request.httpBody = jsonData
@@ -503,7 +509,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
 
         guard tuple.statusCode == 201
         else {
-            throw Error.invalidURL(string: error)
+            throw Error.unableToRegisterDevice(string: error)
         }
 
     }
