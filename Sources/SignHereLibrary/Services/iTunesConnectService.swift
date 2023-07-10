@@ -485,7 +485,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                             ))
 
 
-        let errorMessage = String(100)
+        let errorMessage = "Failed"
 
 
         let jsonEncoder = JSONEncoder()
@@ -497,33 +497,15 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
 
         let tuple: (data: Data, _, statusCode: Int) = try network.executeWithStatusCode(request: request)
 
+        let responseBody = String(data: tuple.data, encoding: .utf8)
+
+        let error = String(tuple.statusCode) + "-" + (responseBody ?? "")
+
         guard tuple.statusCode == 201
         else {
-            throw Error.invalidURL(string: String(tuple.statusCode))
+            throw Error.invalidURL(string: error)
         }
-       // let tuple: (data: Data, _, statusCode: Int) = try network.executeWithStatusCode(request: requestData)
-       // let responseBody = String(data: tuple.data, encoding: .utf8)
 
-        // request.httpBody = try JSONEncoder().encode(
-        //     Data(type: "devices", attributes: Attributes(name: name, udid: udid, platform: platform))
-        //     )
-
-        // let requestData = DeviceRequestData(data: DeviceRequestData.Data(
-        //                         attributes: DeviceRequestData.Attributes(name: name, platform: platform, udid: udid),
-        //                         type: "devices"
-        //                     ))
-
-
-      //  let requestData = Data(type: "devices", attributes: Attributes(name: name, udid: udid, platform: platform))
-    //     let tuple: (data: Data, _, statusCode: Int) = try network.executeWithStatusCode(request: requestData)
-
-    //   //  let tuple: (data: Data, _, statusCode: Int) = try network.executeWithStatusCode(request: request)
-    //     let responseBody = String(data: tuple.data, encoding: .utf8)
-    //     let errorMessage = String(tuple.statusCode) + "-" + (responseBody ?? "")
-    //     guard tuple.statusCode == 201
-    //     else {
-    //         throw Error.invalidURL(string: errorMessage)
-    //     }
     }
 
 
