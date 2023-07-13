@@ -72,8 +72,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                     """
                 case let .unableToRegisterDevice(string: string):
                     return """
-                    [iTunesConnectServiceImp] Unable to register device
-                    - url string: \(string)
+                    \n\(string)
                     """
                 case let .unableToCreateURL(urlComponents: urlComponents):
                     return """
@@ -503,10 +502,22 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
 
         let tuple: (data: Data, _, statusCode: Int) = try network.executeWithStatusCode(request: request)
 
-        let responseBody = String(data: tuple.data, encoding: .utf8)
+        let responseBody = String(data: tuple.data, encoding: .utf8) ?? ""
+    
+        let error = String(tuple.statusCode) + "-" + (responseBody) 
 
-        let error = String(tuple.statusCode) + "-" + (responseBody ?? "")
-
+        if tuple.statusCode == 409 {
+            if responseBody.contains("ENTITY_ERROR.ATTRIBUTE.INVALID") {
+                throw Error.unableToRegisterDevice(string: "Your udid is an invalid value, try again with a different one!")}
+            else {
+                throw Error.unableToRegisterDevice(string: "Awesome this device is already registered under " + name + ", you are good to go!") }
+        }
+        else if tuple.statusCode == 400{
+            throw Error.unableToRegisterDevice(string: "The request is invalid and cannot be accepted.")
+        }
+        else if tuple.statusCode == 403{
+            throw Error.unableToRegisterDevice(string: "The request is not allowed. This can happen if your API key is revoked, your token is incorrectly formatted, or if the requested operation is not allowed.") }
+        
         guard tuple.statusCode == 201
         else {
             throw Error.unableToRegisterDevice(string: error)
