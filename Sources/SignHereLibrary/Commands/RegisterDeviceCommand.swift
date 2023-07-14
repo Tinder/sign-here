@@ -1,8 +1,8 @@
 //
-//  DeleteProvisioningProfileCommand.swift
+//  RegisterDeviceCommand.swift
 //  Commands
 //
-//  Created by Maxwell Elliott on 04/24/23.
+//  Created by Pranavi Gupta on 07/11/23.
 //
 
 import ArgumentParser
@@ -14,7 +14,7 @@ internal struct RegisterDeviceCommand: ParsableCommand {
 
     internal static var configuration: CommandConfiguration =
         .init(commandName: "register-device",
-              abstract: "Use this command to register a device using its iTunes Connect API ID",
+              abstract: "Use this command to register a device using its udid",
               discussion: """
               """)
 

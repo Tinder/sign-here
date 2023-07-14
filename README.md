@@ -143,6 +143,29 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 
+### register-device 
+
+```terminal
+sign-here register-device --help
+OVERVIEW: Use this command to register a device using its udid
+
+USAGE: sign-here register-device --platform <platform> --name <name> --udid <udid> --key-identifier <key-identifier> --issuer-id <issuer-id> --itunes-connect-key-path <itunes-connect-key-path>
+
+OPTIONS: 
+  --platform <platform>
+                          The operating system intended for the bundle: IOS or MAC_OS (https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform)"
+  --name <name>
+                          Your Name's Device (example: Johns iPhone 13)
+  --udid <udid>
+                          The device's UDID                                  
+  --key-identifier <key-identifier>
+                          The key identifier of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
+  --issuer-id <issuer-id> The issuer id of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
+  --itunes-connect-key-path <itunes-connect-key-path>
+                          The path to the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
+  -h, --help              Show help information.
+```
+
 ## Installing
 
 ### Download pre-built binary
