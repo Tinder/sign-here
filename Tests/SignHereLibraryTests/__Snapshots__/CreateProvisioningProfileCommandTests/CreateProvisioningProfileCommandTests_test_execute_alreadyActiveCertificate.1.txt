@@ -30,10 +30,16 @@
     - .3: Optional<Data>.none
   ▿ (4 elements)
     - .0: "/usr/bin/env"
-    ▿ .1: 11 elements
+    ▿ .1: 17 elements
       - "/opensslPath"
       - "pkcs12"
       - "-export"
+      - "-macalg"
+      - "sha1"
+      - "-keypbe"
+      - "PBE-SHA1-3DES"
+      - "-certpbe"
+      - "PBE-SHA1-3DES"
       - "-inkey"
       - "privateKeyPath"
       - "-in"
