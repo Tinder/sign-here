@@ -57,6 +57,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
             bundleIdentifierName: "bundleIdentifierName"
         )
+        isRecording = false
     }
 
     override func tearDown() {
