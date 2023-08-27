@@ -160,12 +160,12 @@ WORKSPACE
 ```python
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-com_github_tinder_sign_here_version = "0.0.1"
+com_github_tinder_sign_here_version = "1.0.0"
 http_archive(
     name = "com_github_tinder_sign_here",
     url = "https://github.com/Tinder/sign-here/archive/refs/tags/%s.tar.gz" % com_github_tinder_sign_here_version,
     type = "tar.gz",
-    sha256 = "b9a614f2221b484b9d615259afac3d4c80c4ce97558b30d9e7a9b53029e14290",
+    sha256 = "15fee635c5f248fa494c5d7041e45468d65be55d406fc4a222de3ece226e7b2e",
     strip_prefix = "sign-here-%s" % com_github_tinder_sign_here_version,
 )
 
