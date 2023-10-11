@@ -26,7 +26,8 @@ internal protocol iTunesConnectService {
     func determineBundleIdITCId(
         jsonWebToken: String,
         bundleIdentifier: String,
-        bundleIdentifierName: String?
+        bundleIdentifierName: String?,
+        platform: String
     ) throws -> String
     func fetchITCDeviceIDs(jsonWebToken: String) throws -> Set<String>
     func createProfile(
@@ -46,7 +47,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
     enum Error: Swift.Error, CustomStringConvertible {
         case invalidURL(string: String)
         case unableToCreateURL(urlComponents: URLComponents)
-        case unableToDetermineITCIdForBundleId(bundleIdentifier: String)
+        case unableToDetermineITCIdForBundleId(bundleIdentifier: String, platform: String)
         case unableToDetermineModulusForCertificate(output: ShellOutput)
         case unableToDetermineModulusForPrivateKey(privateKeyPath: String, output: ShellOutput)
         case unableToBase64DecodeCertificate(displayName: String)
@@ -64,10 +65,11 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                     return """
                     [iTunesConnectServiceImp] Unable to create url for itunes connect request from url components: \(urlComponents.description)
                     """
-                case let .unableToDetermineITCIdForBundleId(bundleIdentifier: bundleIdentifier):
+                case let .unableToDetermineITCIdForBundleId(bundleIdentifier: bundleIdentifier, platform: platform):
                     return """
                     [iTunesConnectServiceImp] Unable to determine iTunesConnect API ID for bundle identifier
                     - Bundle Identifier: \(bundleIdentifier)
+                    - Platform: \(platform)
                     """
                 case let .unableToDetermineModulusForCertificate(output: output):
                     return """
@@ -226,7 +228,8 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
     func determineBundleIdITCId(
         jsonWebToken: String,
         bundleIdentifier: String,
-        bundleIdentifierName: String?
+        bundleIdentifierName: String?,
+        platform: String
     ) throws -> String {
         var urlComponents: URLComponents = .init()
         urlComponents.scheme = Constants.httpsScheme
@@ -250,20 +253,22 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         return try makeFirstITCIdForBundleId(
             data: data,
             bundleIdentifier: bundleIdentifier,
-            bundleIdentifierName: bundleIdentifierName
+            bundleIdentifierName: bundleIdentifierName,
+            platform: platform
         )
     }
 
     private func makeFirstITCIdForBundleId(
         data: Data,
         bundleIdentifier: String,
-        bundleIdentifierName: String?
+        bundleIdentifierName: String?,
+        platform: String
     ) throws -> String {
         do {
             let listBundleIDsResponse: ListBundleIDsResponse = try createITCApiJSONDecoder().decode(ListBundleIDsResponse.self, from: data)
             guard let bundleIdITCId: String = listBundleIDsResponse.data.compactMap({ bundleData in
                 guard bundleData.attributes.identifier == bundleIdentifier,
-                    bundleData.attributes.platform == "IOS"
+                    bundleData.attributes.platform == platform
                 else {
                     return nil
                 }
@@ -276,7 +281,10 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                 return bundleData.id
             }).first
             else {
-                throw Error.unableToDetermineITCIdForBundleId(bundleIdentifier: bundleIdentifier)
+                throw Error.unableToDetermineITCIdForBundleId(
+                    bundleIdentifier: bundleIdentifier,
+                    platform: platform
+                )
             }
             return bundleIdITCId
         } catch let decodingError as DecodingError {
