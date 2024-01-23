@@ -163,7 +163,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     internal var opensslPath: String
 
     @Option(help: "Intermediary Apple Certificates that should also be added to the keychain (https://www.apple.com/certificateauthority/)")
-    internal var intermediaryAppleCertificates: [String]
+    internal var intermediaryAppleCertificates: [String] = []
 
     @Option(help: """
     Subject for the Certificate Signing Request when creating certificates.
