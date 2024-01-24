@@ -36,8 +36,8 @@ genrule(
     srcs = srcs,
     outs = ["SignHereLibrary_GeneratedMocks.swift"],
     cmd = "$(location @mockolo//:mockolo) -srcs $(SRCS) -d $@ -i SignHereLibrary --enable-args-history > /dev/null",
-    exec_tools = [
-        "@mockolo//:mockolo",
+    tools = [
+        "@mockolo",
     ],
 )
 
