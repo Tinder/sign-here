@@ -27,8 +27,8 @@ genrule(
     srcs = srcs,
     outs = ["CoreLibrary_GeneratedMocks.swift"],
     cmd = "$(location @mockolo//:mockolo) -srcs $(SRCS) -d $@ -i CoreLibrary --enable-args-history > /dev/null",
-    exec_tools = [
-        "@mockolo//:mockolo",
+    tools = [
+        "@mockolo",
     ],
 )
 

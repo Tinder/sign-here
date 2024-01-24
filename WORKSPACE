@@ -1,9 +1,11 @@
+workspace(name = "com_github_tinder_sign_here")
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "build_bazel_rules_apple",
-    sha256 = "9e26307516c4d5f2ad4aee90ac01eb8cd31f9b8d6ea93619fc64b3cbc81b0944",
-    url = "https://github.com/bazelbuild/rules_apple/releases/download/2.2.0/rules_apple.2.2.0.tar.gz",
+    sha256 = "9c4f1e1ec4fdfeac5bddb07fa0e872c398e3d8eb0ac596af9c463f9123ace292",
+    url = "https://github.com/bazelbuild/rules_apple/releases/download/3.2.1/rules_apple.3.2.1.tar.gz",
 )
 
 load(
@@ -40,7 +42,3 @@ load(
 )
 
 sign_here_dependencies()
-
-load("@com_github_keith_swift_syntax_bazel//:deps.bzl", "swift_syntax_deps")
-
-swift_syntax_deps()
