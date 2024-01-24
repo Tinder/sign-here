@@ -1,0 +1,4 @@
+bazel_dep(name = "rules_apple", version = "3.2.1", repo_name = "build_bazel_rules_apple")
+
+non_module_dependencies = use_extension("//:extensions.bzl", "non_module_dependencies")
+use_repo(non_module_dependencies, "data_file")

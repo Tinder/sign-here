@@ -102,7 +102,7 @@ swift_library(
         sha256 = "c708192350913e9fa9a412bde60dcf9cc2e90b58573c4f6af1298dd27e31c642",
     )
 
-    MOCKOLO_VERSION = "1.7.0"
+    MOCKOLO_VERSION = "519439fb550dc23e622897de0080ce8ba68ddd78"
 
     _maybe(
         http_archive,
@@ -123,8 +123,8 @@ swift_library(
     deps = [
         "@SwiftToolsSupportCore//:TSCUtility",
         "@com_github_apple_swift_argument_parser//:ArgumentParser",
-        "@com_github_keith_swift_syntax//:SwiftSyntax",
-        "@com_github_keith_swift_syntax//:SwiftSyntaxParser",
+        "@SwiftSyntax//:SwiftParser_opt",
+        "@SwiftSyntax//:SwiftSyntax_opt",
     ],
 )
 
@@ -153,17 +153,9 @@ swift_binary(
     ],
 )
         """,
-        sha256 = "b36c49d835895b643e631c5cba3c9048f0628f68d37c5adf739a30de93677304",
+        sha256 = "",
         strip_prefix = "mockolo-%s" % MOCKOLO_VERSION,
-        urls = ["https://github.com/uber/mockolo/archive/%s.tar.gz" % MOCKOLO_VERSION],
-    )
-
-    _maybe(
-        http_archive,
-        name = "com_github_keith_swift_syntax_bazel",
-        sha256 = "379e3d4238acf313da444663243f20a479040b765324f743ce3120055b4e9772",
-        strip_prefix = "swift-syntax-bazel-14.1.0.14B47b",
-        url = "https://github.com/keith/swift-syntax-bazel/archive/refs/tags/14.1.0.14B47b.tar.gz",
+        urls = ["https://github.com/uber/mockolo/archive/%s.zip" % MOCKOLO_VERSION],
     )
 
     SWIFT_TOOLS_SUPPORT_CORE_VERSION = "0.5.2"
@@ -327,4 +319,13 @@ swift_library(
         sha256 = "fc37a90810c9ea402ab5612b4942ad1a22ae8105bbdd36cc64e0912343ad4a90",
         strip_prefix = "swift-snapshot-testing-%s" % SWIFT_SNAPSHOT_TESTING_GIT_SHA,
         url = "https://github.com/pointfreeco/swift-snapshot-testing/archive/%s.zip" % SWIFT_SNAPSHOT_TESTING_GIT_SHA,
+    )
+
+    SWIFT_SYNTAX_VERSION = "509.0.0"
+    _maybe(
+        http_archive,
+        name = "SwiftSyntax",
+        sha256 = "1cddda9f7d249612e3d75d4caa8fd9534c0621b8a890a7d7524a4689bce644f1",
+        strip_prefix = "swift-syntax-%s" % SWIFT_SYNTAX_VERSION,
+        url = "https://github.com/apple/swift-syntax/archive/refs/tags/%s.tar.gz" % SWIFT_SYNTAX_VERSION,
     )
