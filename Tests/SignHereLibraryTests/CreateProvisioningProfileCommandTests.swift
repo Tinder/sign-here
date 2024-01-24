@@ -56,7 +56,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
             bundleIdentifierName: "bundleIdentifierName",
-            platform: "platform"
+            platform: "platform",
+            profileName: "profileName"
         )
         isRecording = false
     }
@@ -210,7 +211,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createCertificateHandler = { _, _, _ in
             self.createCreateCertificateResponse()
         }
-        iTunesConnectService.createProfileHandler = { _, _, _, _, _ in
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
 
@@ -253,7 +254,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createCertificateHandler = { _, _, _ in
             self.createCreateCertificateResponse()
         }
-        iTunesConnectService.createProfileHandler = { _, _, _, _, _ in
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
 

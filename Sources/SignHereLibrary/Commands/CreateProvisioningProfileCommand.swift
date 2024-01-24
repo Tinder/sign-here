@@ -121,6 +121,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case opensslPath = "opensslPath"
         case intermediaryAppleCertificates = "intermediaryAppleCertificates"
         case certificateSigningRequestSubject = "certificateSigningRequestSubject"
+        case profileName = "profileName"
     }
 
     @Option(help: "The key identifier of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)")
@@ -164,6 +165,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
 
     @Option(help: "Intermediary Apple Certificates that should also be added to the keychain (https://www.apple.com/certificateauthority/)")
     internal var intermediaryAppleCertificates: [String] = []
+
+    @Option(help: "The name that you would like to assign to the created provisioning profile (optional)")
+    internal var profileName: String?
 
     @Option(help: """
     Subject for the Certificate Signing Request when creating certificates.
@@ -223,7 +227,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         intermediaryAppleCertificates: [String],
         certificateSigningRequestSubject: String,
         bundleIdentifierName: String?,
-        platform: String
+        platform: String,
+        profileName: String?
     ) {
         self.files = files
         self.log = log
@@ -246,6 +251,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.certificateSigningRequestSubject = certificateSigningRequestSubject
         self.bundleIdentifierName = bundleIdentifierName
         self.platform = platform
+        self.profileName = profileName
     }
 
     internal init(from decoder: Decoder) throws {
@@ -279,7 +285,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             intermediaryAppleCertificates: try container.decodeIfPresent([String].self, forKey: .intermediaryAppleCertificates) ?? [],
             certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject),
             bundleIdentifierName: try container.decodeIfPresent(String.self, forKey: .bundleIdentifierName),
-            platform: try container.decode(String.self, forKey: .platform)
+            platform: try container.decode(String.self, forKey: .platform),
+            profileName: try container.decode(String.self, forKey: .profileName)
         )
     }
 
@@ -315,7 +322,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             ),
             certificateId: certificateId,
             deviceIDs: deviceIDs,
-            profileType: profileType
+            profileType: profileType,
+            profileName: profileName
         )
         guard let profileData: Data = .init(base64Encoded: profileResponse.data.attributes.profileContent)
         else {
