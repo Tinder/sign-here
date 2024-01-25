@@ -107,6 +107,8 @@ OPTIONS:
                           Path to the openssl executable, this is used to generate CSR signing artifacts that are required when creating certificates
   --intermediary-apple-certificates <intermediary-apple-certificates>
                           Intermediary Apple Certificates that should also be added to the keychain (https://www.apple.com/certificateauthority/)
+  --profile-name <profile-name>
+                          The name that you would like to assign to the created provisioning profile (optional)
   --certificate-signing-request-subject <certificate-signing-request-subject>
                           Subject for the Certificate Signing Request when creating certificates.
 
