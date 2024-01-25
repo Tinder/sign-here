@@ -581,6 +581,36 @@ final class iTunesConnectServiceTests: XCTestCase {
         )
     }
 
+    func test_createProfile_withProfileName() throws {
+        // GIVEN
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createCreateProfileResponse()),
+        ]
+        network.executeHandler = { _ in
+            return networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        let value: CreateProfileResponse = try subject.createProfile(
+            jsonWebToken: "jsonWebToken",
+            bundleId: "bundleId",
+            certificateId: "certificateId",
+            deviceIDs: .init(["deviceId"]),
+            profileType: "profileType",
+            profileName: "mySpecialProfile"
+        )
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
+        assertSnapshot(
+            matching: value,
+            as: .dump
+        )
+    }
+
     func test_createProfile_iosAppStoreProfile() throws {
         // GIVEN
         let jsonEncoder: JSONEncoder = createJSONEncoder()

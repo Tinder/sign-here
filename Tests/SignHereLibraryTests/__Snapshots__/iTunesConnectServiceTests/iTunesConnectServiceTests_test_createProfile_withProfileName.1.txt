@@ -1,0 +1,7 @@
+curl \
+	--request POST \
+	--header "Accept: application/json" \
+	--header "Authorization: Bearer jsonWebToken" \
+	--header "Content-Type: application/json" \
+	--data "{\"data\":{\"attributes\":{\"name\":\"mySpecialProfile\",\"profileType\":\"profileType\"},\"type\":\"profiles\",\"relationships\":{\"devices\":{\"data\":[{\"id\":\"deviceId\",\"type\":\"devices\"}]},\"certificates\":{\"data\":[{\"id\":\"certificateId\",\"type\":\"certificates\"}]},\"bundleId\":{\"data\":{\"id\":\"bundleId\",\"type\":\"bundleIds\"}}}}}" \
+	"https://api.appstoreconnect.apple.com/v1/profiles"
