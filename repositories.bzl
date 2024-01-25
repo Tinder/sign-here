@@ -47,6 +47,9 @@ swift_library(
     copts = [
         "-suppress-warnings",
     ],
+    features = [
+        "-swift.treat_warnings_as_errors",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":ArgumentParserToolInfo"
@@ -73,6 +76,9 @@ swift_library(
     copts = [
         "-suppress-warnings",
     ],
+    features = [
+        "-swift.treat_warnings_as_errors",
+    ],
     visibility = ["//visibility:public"],
 )
         """,
@@ -92,7 +98,12 @@ swift_library(
     srcs = glob([
         "Sources/CryptorECC/**/*.swift",
     ]),
-    copts = ["-suppress-warnings"],
+    copts = [
+        "-suppress-warnings",
+    ],
+    features = [
+        "-swift.treat_warnings_as_errors",
+    ],
     module_name = "CryptorECC",
     visibility = [
         "//visibility:public",
