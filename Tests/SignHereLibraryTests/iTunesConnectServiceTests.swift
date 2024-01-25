@@ -568,7 +568,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
             profileType: "profileType",
-            profileName: "profileName"
+            profileName: nil
         )
 
         // THEN
@@ -598,7 +598,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
             profileType: "IOS_APP_STORE",
-            profileName: "profileName"
+            profileName: nil
         )
 
         // THEN
@@ -627,7 +627,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
             profileType: "profileType",
-            profileName: "profileName"
+            profileName: nil
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return

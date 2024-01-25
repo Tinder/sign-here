@@ -161,7 +161,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
             "bundleIdentifierName": "bundleIdentifierName",
-            "platform": "platform"
+            "platform": "platform",
+            "profileName": "profileName"
         }
         """.utf8)
 
@@ -181,6 +182,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.outputPath, "/outputPath")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
+        XCTAssertEqual(subject.profileName, "profileName")
     }
 
     func test_execute_alreadyActiveCertificate() throws {

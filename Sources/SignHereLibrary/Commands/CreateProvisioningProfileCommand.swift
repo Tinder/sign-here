@@ -286,7 +286,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject),
             bundleIdentifierName: try container.decodeIfPresent(String.self, forKey: .bundleIdentifierName),
             platform: try container.decode(String.self, forKey: .platform),
-            profileName: try container.decode(String.self, forKey: .profileName)
+            profileName: try container.decodeIfPresent(String.self, forKey: .profileName)
         )
     }
 
