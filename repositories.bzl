@@ -118,6 +118,7 @@ swift_library(
     _maybe(
         http_archive,
         name = "mockolo",
+        integrity = "sha256-12D/tUZKP87bS2NyfmdJP/pFg/JmsdFv1xsr0BvKUGs=",
         build_file_content = """
 load("@build_bazel_rules_swift//swift:swift.bzl", "swift_binary", "swift_library")
 
@@ -164,7 +165,6 @@ swift_binary(
     ],
 )
         """,
-        sha256 = "",
         strip_prefix = "mockolo-%s" % MOCKOLO_VERSION,
         urls = ["https://github.com/uber/mockolo/archive/%s.zip" % MOCKOLO_VERSION],
     )
