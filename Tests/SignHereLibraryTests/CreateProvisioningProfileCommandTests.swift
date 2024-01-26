@@ -56,7 +56,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
             bundleIdentifierName: "bundleIdentifierName",
-            platform: "platform"
+            platform: "platform",
+            profileName: "profileName"
         )
         isRecording = false
     }
@@ -160,7 +161,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
             "bundleIdentifierName": "bundleIdentifierName",
-            "platform": "platform"
+            "platform": "platform",
+            "profileName": "profileName"
         }
         """.utf8)
 
@@ -180,6 +182,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.outputPath, "/outputPath")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
+        XCTAssertEqual(subject.profileName, "profileName")
     }
 
     func test_execute_alreadyActiveCertificate() throws {
@@ -210,7 +213,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createCertificateHandler = { _, _, _ in
             self.createCreateCertificateResponse()
         }
-        iTunesConnectService.createProfileHandler = { _, _, _, _, _ in
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
 
@@ -253,7 +256,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createCertificateHandler = { _, _, _ in
             self.createCreateCertificateResponse()
         }
-        iTunesConnectService.createProfileHandler = { _, _, _, _, _ in
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
 

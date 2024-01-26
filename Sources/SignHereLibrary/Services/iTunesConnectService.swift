@@ -35,7 +35,8 @@ internal protocol iTunesConnectService {
         bundleId: String,
         certificateId: String,
         deviceIDs: Set<String>,
-        profileType: String
+        profileType: String,
+        profileName: String?
     ) throws -> CreateProfileResponse
     func deleteProvisioningProfile(
         jsonWebToken: String,
@@ -352,7 +353,8 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         bundleId: String,
         certificateId: String,
         deviceIDs: Set<String>,
-        profileType: String
+        profileType: String,
+        profileName: String? = nil
     ) throws -> CreateProfileResponse {
         let urlString: String = "https://api.appstoreconnect.apple.com/v1/profiles"
         guard let url: URL = .init(string: urlString)
@@ -364,7 +366,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: Constants.contentTypeHeaderName)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "POST"
-        let profileName: String = "\(certificateId)_\(profileType)_\(clock.now().timeIntervalSince1970)"
+        let profileName = profileName ?? "\(certificateId)_\(profileType)_\(clock.now().timeIntervalSince1970)"
         var devices: CreateProfileRequest.CreateProfileRequestData.Relationships.Devices? = nil
         // ME: App Store profiles cannot use UDIDs
         if !["IOS_APP_STORE", "MAC_APP_STORE", "TVOS_APP_STORE", "MAC_CATALYST_APP_STORE"].contains(profileType) {

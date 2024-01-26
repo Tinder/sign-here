@@ -567,7 +567,38 @@ final class iTunesConnectServiceTests: XCTestCase {
             bundleId: "bundleId",
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
-            profileType: "profileType"
+            profileType: "profileType",
+            profileName: nil
+        )
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
+        assertSnapshot(
+            matching: value,
+            as: .dump
+        )
+    }
+
+    func test_createProfile_withProfileName() throws {
+        // GIVEN
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createCreateProfileResponse()),
+        ]
+        network.executeHandler = { _ in
+            return networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        let value: CreateProfileResponse = try subject.createProfile(
+            jsonWebToken: "jsonWebToken",
+            bundleId: "bundleId",
+            certificateId: "certificateId",
+            deviceIDs: .init(["deviceId"]),
+            profileType: "profileType",
+            profileName: "mySpecialProfile"
         )
 
         // THEN
@@ -596,7 +627,8 @@ final class iTunesConnectServiceTests: XCTestCase {
             bundleId: "bundleId",
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
-            profileType: "IOS_APP_STORE"
+            profileType: "IOS_APP_STORE",
+            profileName: nil
         )
 
         // THEN
@@ -624,7 +656,8 @@ final class iTunesConnectServiceTests: XCTestCase {
             bundleId: "bundleId",
             certificateId: "certificateId",
             deviceIDs: .init(["deviceId"]),
-            profileType: "profileType"
+            profileType: "profileType",
+            profileName: nil
         )) {
             if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
                 return
