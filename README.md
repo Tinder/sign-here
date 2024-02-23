@@ -71,57 +71,94 @@ OPTIONS:
 ### create-provisioning-profile
 
 ```terminal
-sign-here create-provisioning-profile --help
 OVERVIEW: Use this command to create a ready to use provisioning profile.
 
-Use this command to create and save a mobile provisioning profile to a specified location. This command
-takes care of all necessary signing work and iTunes Connect API calls to get a ready to use
+Use this command to create and save a mobile provisioning profile to a
+specified location. This command
+takes care of all necessary signing work and iTunes Connect API calls to get a
+ready to use
 mobile provisioning profile.
 
-The output of this command is the iTunes Connect API ID of the created provisioning profile. This can
+The output of this command is the iTunes Connect API ID of the created
+provisioning profile. This can
 be used with the `delete-provisioning-profile` command to delete it if desired.
 
 USAGE: sign-here create-provisioning-profile <options>
 
 OPTIONS:
   --key-identifier <key-identifier>
-                          The key identifier of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
-  --issuer-id <issuer-id> The issuer id of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
+                          The key identifier of the private key
+                          (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
+  --issuer-id <issuer-id> The issuer id of the private key
+                          (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
   --private-key-path <private-key-path>
-                          The path to a private key to use for generating PEM and P12 files. This key will be attached to any generated certificates or profiles
+                          The path to a private key to use for generating PEM
+                          and P12 files. This key will be attached to any
+                          generated certificates or profiles
   --itunes-connect-key-path <itunes-connect-key-path>
-                          The path to the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
+                          The path to the private key
+                          (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
   --keychain-name <keychain-name>
-                          The name of the keychain to use to store fetched identities
+                          The name of the keychain to use to store fetched
+                          identities
   --keychain-password <keychain-password>
-                          The password of the keychain specified by --keychain-name
+                          The password of the keychain specified by
+                          --keychain-name
   --bundle-identifier <bundle-identifier>
-                          The bundle identifier of the app for which you want to generate a provisioning profile for
+                          The bundle identifier of the app for which you want
+                          to generate a provisioning profile for
+  --bundle-identifier-name <bundle-identifier-name>
+                          The bundle identifier name for the desired bundle
+                          identifier, this is optional but if it is not set the
+                          logic will select the first bundle id it finds that
+                          matches `--bundle-identifier`
+  --platform <platform>   The intended operating system for the target
+                          (https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform)
   --profile-type <profile-type>
-                          The profile type which you wish to create (https://developer.apple.com/documentation/appstoreconnectapi/profilecreaterequest/data/attributes)
+                          The profile type which you wish to create
+                          (https://developer.apple.com/documentation/appstoreconnectapi/profilecreaterequest/data/attributes)
   --certificate-type <certificate-type>
-                          The certificate type which you wish to create (https://developer.apple.com/documentation/appstoreconnectapi/certificatetype)
+                          The certificate type which you wish to create
+                          (https://developer.apple.com/documentation/appstoreconnectapi/certificatetype)
   --output-path <output-path>
                           Where to save the created provisioning profile
   --openssl-path <openssl-path>
-                          Path to the openssl executable, this is used to generate CSR signing artifacts that are required when creating certificates
+                          Path to the openssl executable, this is used to
+                          generate CSR signing artifacts that are required when
+                          creating certificates
   --intermediary-apple-certificates <intermediary-apple-certificates>
-                          Intermediary Apple Certificates that should also be added to the keychain (https://www.apple.com/certificateauthority/)
+                          Intermediary Apple Certificates that should also be
+                          added to the keychain
+                          (https://www.apple.com/certificateauthority/)
   --profile-name <profile-name>
-                          The name that you would like to assign to the created provisioning profile (optional)
+                          The name that you would like to assign to the created
+                          provisioning profile (optional)
   --certificate-signing-request-subject <certificate-signing-request-subject>
-                          Subject for the Certificate Signing Request when creating certificates.
+                          Subject for the Certificate Signing Request when
+                          creating certificates.
 
-                          OpenSSL documentation for this flag (https://www.openssl.org/docs/manmaster/man1/openssl-req.html):
+                          OpenSSL documentation for this flag
+                          (https://www.openssl.org/docs/manmaster/man1/openssl-req.html):
 
-                          Sets subject name for new request or supersedes the subject name when processing a certificate request.
+Sets
+                          subject name for new request or supersedes the
+                          subject name when processing a certificate request.
 
-                          The arg must be formatted as '/type0=value0/type1=value1/type2=....'. Special characters may be escaped by '\' (backslash), whitespace is retained. Empty values are
-                          permitted, but the corresponding type will not be included in the request. Giving a single '/' will lead to an empty sequence of RDNs (a NULL-DN). Multi-valued RDNs can be
-                          formed by placing a '+' character instead of a '/' between the AttributeValueAssertions (AVAs) that specify the members of the set. Example:
+                          The arg must be formatted as
+                          '/type0=value0/type1=value1/type2=....'. Special
+                          characters may be escaped by '\' (backslash),
+                          whitespace is retained. Empty values are permitted,
+                          but the corresponding type will not be included in
+                          the request. Giving a single '/' will lead to an
+                          empty sequence of RDNs (a NULL-DN). Multi-valued RDNs
+                          can be formed by placing a '+' character instead of a
+                          '/' between the AttributeValueAssertions (AVAs) that
+                          specify the members of the set. Example:
 
                           /DC=org/DC=OpenSSL/DC=users/UID=123456+CN=JohnDoe
   -h, --help              Show help information.
+
+
 ```
 
 ### delete-provisioning-profile
