@@ -150,7 +150,7 @@ OPTIONS:
 ### Download pre-built binary
 
 ```terminal
-curl -L https://github.com/Tinder/sign-here/releases/download/0.0.1/sign-here -o sign-here
+curl -L https://github.com/Tinder/sign-here/releases/download/2.2.0/sign-here -o sign-here
 chmod +x sign-here
 ./sign-here
 ```
@@ -162,12 +162,11 @@ WORKSPACE
 ```python
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-com_github_tinder_sign_here_version = "1.0.0"
+com_github_tinder_sign_here_version = "2.2.0"
 http_archive(
     name = "com_github_tinder_sign_here",
     url = "https://github.com/Tinder/sign-here/archive/refs/tags/%s.tar.gz" % com_github_tinder_sign_here_version,
     type = "tar.gz",
-    sha256 = "15fee635c5f248fa494c5d7041e45468d65be55d406fc4a222de3ece226e7b2e",
     strip_prefix = "sign-here-%s" % com_github_tinder_sign_here_version,
 )
 
