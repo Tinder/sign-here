@@ -13,12 +13,29 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk test //Tests/... --xcode_version=14.3
+  tests-bzlmod:
+    name: Run tests w/bzlmod
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3
+      - run: bazelisk test //Tests/... --xcode_version=14.3 --enable_bzlmod
   executable:
     name: Build macos_command_line_application
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sign-here
+          path: bazel-bin/Sources/SignHereTool/sign-here
+          if-no-files-found: error
+  executable-bzlmod:
+    name: Build macos_command_line_application w/bzlmod
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3
+      - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64 --enable_bzlmod
       - uses: actions/upload-artifact@v3
         with:
           name: sign-here

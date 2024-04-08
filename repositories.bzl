@@ -13,50 +13,8 @@ def _maybe(repo_rule, name, **kwargs):
     if not native.existing_rule(name):
         repo_rule(name = name, **kwargs)
 
-def sign_here_dependencies():
+def sign_here_dependencies(bzlmod = False):
     """Sets up all necessary transitive dependencies."""
-
-    _maybe(
-        http_archive,
-        name = "com_github_apple_swift_argument_parser",
-        url = "https://github.com/apple/swift-argument-parser/archive/refs/tags/1.2.2.tar.gz",
-        strip_prefix = "swift-argument-parser-1.2.2",
-        sha256 = "44782ba7180f924f72661b8f457c268929ccd20441eac17301f18eff3b91ce0c",
-        build_file_content = """
-load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
-    "swift_library",
-)
-
-load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
-
-swift_library(
-    name = "ArgumentParserToolInfo",
-    module_name = "ArgumentParserToolInfo",
-    srcs = glob([
-        "Sources/ArgumentParserToolInfo/**/*.swift"
-    ], allow_empty = False),
-)
-
-swift_library(
-    name = "ArgumentParser",
-    module_name = "ArgumentParser",
-    srcs = glob([
-        "Sources/ArgumentParser/**/*.swift"
-    ], allow_empty = False),
-    copts = [
-        "-suppress-warnings",
-    ],
-    features = [
-        "-swift.treat_warnings_as_errors",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":ArgumentParserToolInfo"
-    ]
-)
-    """,
-    )
 
     PATHKIT_GIT_SHA = "2fcd4618d52869b342e208324d455131a48f9e9b"
     _maybe(
@@ -339,4 +297,50 @@ swift_library(
         sha256 = "1cddda9f7d249612e3d75d4caa8fd9534c0621b8a890a7d7524a4689bce644f1",
         strip_prefix = "swift-syntax-%s" % SWIFT_SYNTAX_VERSION,
         url = "https://github.com/apple/swift-syntax/archive/refs/tags/%s.tar.gz" % SWIFT_SYNTAX_VERSION,
+    )
+
+    # End non-bzlmod deps
+    if bzlmod:
+        return
+
+    _maybe(
+        http_archive,
+        name = "com_github_apple_swift_argument_parser",
+        url = "https://github.com/apple/swift-argument-parser/archive/refs/tags/1.2.2.tar.gz",
+        strip_prefix = "swift-argument-parser-1.2.2",
+        sha256 = "44782ba7180f924f72661b8f457c268929ccd20441eac17301f18eff3b91ce0c",
+        build_file_content = """
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
+
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+
+swift_library(
+    name = "ArgumentParserToolInfo",
+    module_name = "ArgumentParserToolInfo",
+    srcs = glob([
+        "Sources/ArgumentParserToolInfo/**/*.swift"
+    ], allow_empty = False),
+)
+
+swift_library(
+    name = "ArgumentParser",
+    module_name = "ArgumentParser",
+    srcs = glob([
+        "Sources/ArgumentParser/**/*.swift"
+    ], allow_empty = False),
+    copts = [
+        "-suppress-warnings",
+    ],
+    features = [
+        "-swift.treat_warnings_as_errors",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ArgumentParserToolInfo"
+    ]
+)
+    """,
     )
