@@ -95,6 +95,7 @@ OPTIONS:
                           The path to a private key to use for generating PEM
                           and P12 files. This key will be attached to any
                           generated certificates or profiles
+                          Use `openssl genrsa -out key.pem 2048` to generate it
   --itunes-connect-key-path <itunes-connect-key-path>
                           The path to the private key
                           (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)
