@@ -1379,7 +1379,7 @@
   "moduleExtensions": {
     "//:extensions.bzl%non_module_dependencies": {
       "general": {
-        "bzlTransitiveDigest": "P1JUpq+Gnkii3uIYNOJ8g2c/SfGD8pMGSizap66ROpo=",
+        "bzlTransitiveDigest": "Ep7fmfOBPzREF045u058BTSSHGEnXMIpN7hhvedcJHw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1585,7 +1585,7 @@
     },
     "@@rules_java~//java:extensions.bzl%toolchains": {
       "general": {
-        "bzlTransitiveDigest": "tJHbmWnq7m+9eUBnUdv7jZziQ26FmcGL9C5/hU3Q9UQ=",
+        "bzlTransitiveDigest": "0N5b5J9fUzo0sgvH4F3kIEaeXunz4Wy2/UtSFV/eXUY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2090,7 +2090,7 @@
     },
     "@@rules_swift~//swift:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "m78FIsmmvFalZmXxi26P0AW5U6W6G+u5KGknjClFU/0=",
+        "bzlTransitiveDigest": "2HjojbikzYbmbwZ2N19uSSpcNJ002txg/QLUMC0rEYk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

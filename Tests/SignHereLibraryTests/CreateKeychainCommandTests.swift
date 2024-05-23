@@ -16,15 +16,18 @@ import XCTest
 final class CreateKeychainCommandTests: XCTestCase {
     var shell: ShellMock!
     var keychain: KeychainMock!
+    var log: LogMock!
     var subject: CreateKeychainCommand!
 
     override func setUp() {
         super.setUp()
         shell = .init()
         keychain = .init()
+        log = .init()
         subject = .init(
             shell: shell,
             keychain: keychain,
+            log: log,
             keychainName: "keychainName",
             keychainPassword: "keychainPassword"
         )
@@ -33,6 +36,7 @@ final class CreateKeychainCommandTests: XCTestCase {
     override func tearDown() {
         shell = nil
         keychain = nil
+        log = nil
         subject = nil
         super.tearDown()
     }
@@ -69,6 +73,21 @@ final class CreateKeychainCommandTests: XCTestCase {
             ).description,
             as: .lines
         )
+        
+        assertSnapshot(
+            matching: CreateKeychainCommand.Error.unableToListKeychains(
+                output: .init(status: 0, data: .init("output".utf8), errorData: .init("errorOutput".utf8))
+            ).description,
+            as: .lines
+        )
+
+        assertSnapshot(
+            matching: CreateKeychainCommand.Error.unableToFindKeychain(
+                keychainName: "keychainName",
+                output: .init(status: 0, data: .init("output".utf8), errorData: .init("errorOutput".utf8))
+            ).description,
+            as: .lines
+        )
     }
 
     func test_initDecoder() throws {
@@ -92,7 +111,8 @@ final class CreateKeychainCommandTests: XCTestCase {
         var executeLaunchPaths: [ShellOutput] = [
             .init(status: 1, data: .init("createKeychain".utf8), errorData: .init()),
             .init(status: 0, data: .init("updateKeychainLockTimeout".utf8), errorData: .init()),
-            .init(status: 0, data: .init("unlockKeychain".utf8), errorData: .init())
+            .init(status: 0, data: .init("unlockKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("listKeychain".utf8), errorData: .init())
         ]
         shell.executeLaunchPathHandler = { _, _, _, _ in
             executeLaunchPaths.removeFirst()
@@ -119,7 +139,8 @@ final class CreateKeychainCommandTests: XCTestCase {
         var executeLaunchPaths: [ShellOutput] = [
             .init(status: 0, data: .init("createKeychain".utf8), errorData: .init()),
             .init(status: 1, data: .init("updateKeychainLockTimeout".utf8), errorData: .init()),
-            .init(status: 0, data: .init("unlockKeychain".utf8), errorData: .init())
+            .init(status: 0, data: .init("unlockKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("listKeychain".utf8), errorData: .init())
         ]
         shell.executeLaunchPathHandler = { _, _, _, _ in
             executeLaunchPaths.removeFirst()
@@ -146,7 +167,8 @@ final class CreateKeychainCommandTests: XCTestCase {
         var executeLaunchPaths: [ShellOutput] = [
             .init(status: 0, data: .init("createKeychain".utf8), errorData: .init()),
             .init(status: 0, data: .init("updateKeychainLockTimeout".utf8), errorData: .init()),
-            .init(status: 1, data: .init("unlockKeychain".utf8), errorData: .init())
+            .init(status: 1, data: .init("unlockKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("listKeychain".utf8), errorData: .init()),
         ]
         shell.executeLaunchPathHandler = { _, _, _, _ in
             executeLaunchPaths.removeFirst()
@@ -155,6 +177,62 @@ final class CreateKeychainCommandTests: XCTestCase {
         // WHEN
         XCTAssertThrowsError(try subject.run()) {
             if case CreateKeychainCommand.Error.unableToUnlockKeychain(keychainName: _, output: _) = $0 {
+                XCTAssertTrue(true)
+            } else {
+                XCTFail($0.localizedDescription)
+            }
+        }
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+    }
+
+    func test_execute_cannotListKeychain() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("updateKeychainLockTimeout".utf8), errorData: .init()),
+            .init(status: 0, data: .init("unlockKeychain".utf8), errorData: .init()),
+            .init(status: 1, data: .init("listKeychain".utf8), errorData: .init()),
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+
+        // WHEN
+        XCTAssertThrowsError(try subject.run()) {
+            if case CreateKeychainCommand.Error.unableToListKeychains(output: _) = $0 {
+                XCTAssertTrue(true)
+            } else {
+                XCTFail($0.localizedDescription)
+            }
+        }
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+    }
+
+    func test_execute_cannotFindKeychain() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("updateKeychainLockTimeout".utf8), errorData: .init()),
+            .init(status: 0, data: .init("unlockKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("listKeychain".utf8), errorData: .init()),
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+
+        // WHEN
+        XCTAssertThrowsError(try subject.run()) {
+            if case CreateKeychainCommand.Error.unableToFindKeychain(keychainName: _, output: _) = $0 {
                 XCTAssertTrue(true)
             } else {
                 XCTFail($0.localizedDescription)
