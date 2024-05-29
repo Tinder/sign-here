@@ -38,6 +38,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         )
         case unableToCreateCSR(output: ShellOutput)
         case unableToImportIntermediaryAppleCertificate(certificate: String, output: ShellOutput)
+        case profileNameMissing
 
         var description: String {
             switch self {
@@ -101,6 +102,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
                     - Output: \(output.outputString)
                     - Error: \(output.errorString)
                     """
+                case .profileNameMissing:
+                    return "--auto-regenerate flag requires that you include a profile name using the argument --profile-name"
             }
         }
     }
@@ -122,6 +125,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case intermediaryAppleCertificates = "intermediaryAppleCertificates"
         case certificateSigningRequestSubject = "certificateSigningRequestSubject"
         case profileName = "profileName"
+        case autoRegenerate = "autoRegenerate"
     }
 
     @Option(help: "The key identifier of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)")
@@ -182,6 +186,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     """)
     internal var certificateSigningRequestSubject: String
 
+    @Flag(help: "Determines if the profile should be regenated in case it already exists (optional)")
+    internal var autoRegenerate = false
+
     private let files: Files
     private let log: Log
     private let shell: Shell
@@ -228,7 +235,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         certificateSigningRequestSubject: String,
         bundleIdentifierName: String?,
         platform: String,
-        profileName: String?
+        profileName: String?,
+        autoRegenerate: Bool
     ) {
         self.files = files
         self.log = log
@@ -252,6 +260,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.bundleIdentifierName = bundleIdentifierName
         self.platform = platform
         self.profileName = profileName
+        self.autoRegenerate = autoRegenerate
     }
 
     internal init(from decoder: Decoder) throws {
@@ -286,11 +295,27 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject),
             bundleIdentifierName: try container.decodeIfPresent(String.self, forKey: .bundleIdentifierName),
             platform: try container.decode(String.self, forKey: .platform),
-            profileName: try container.decodeIfPresent(String.self, forKey: .profileName)
+            profileName: try container.decodeIfPresent(String.self, forKey: .profileName),
+            autoRegenerate: try container.decode(Bool.self, forKey: .autoRegenerate)
         )
     }
 
     internal func run() throws {
+        let jsonWebToken: String = try jsonWebTokenService.createToken(
+            keyIdentifier: keyIdentifier,
+            issuerID: issuerID,
+            secretKey: try files.read(Path(itunesConnectKeyPath))
+        )
+        if let profileName {
+            try fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)
+        } else if autoRegenerate {
+            throw Error.profileNameMissing
+        } else {
+            try createProvisioningProfile(jsonWebToken: jsonWebToken)
+        }
+    }
+
+    private func createProvisioningProfile(jsonWebToken: String) throws {
         let privateKey: Path = .init(privateKeyPath)
         let csr: Path = try createCSR(privateKey: privateKey)
         let jsonWebToken: String = try jsonWebTokenService.createToken(
@@ -494,6 +519,35 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
                keychainName: keychainName,
                output: output
            )
+        }
+    }
+
+    private func fetchProvisioningProfile(jsonWebToken: String, name: String) throws {
+        if let provisioningProfile = try iTunesConnectService.fetchProvisioningProfile(
+            jsonWebToken: jsonWebToken,
+            name: name
+        ).first {
+            // guard let data: Data = .init(base64Encoded: fetchedActiveCertificate.attributes.certificateContent)
+            // else {
+            //     throw Error.unableToBase64DecodeCertificate(displayName: fetchedActiveCertificate.attributes.displayName)
+            // }
+            // cer = try files.uniqueTemporaryPath() + "\(fetchedActiveCertificate.id).cer"
+            // try files.write(data, to: cer)
+            // certificateId = fetchedActiveCertificate.id
+            print(provisioningProfile)
+        } else {
+            // let createCertificateResponse: CreateCertificateResponse = try iTunesConnectService.createCertificate(
+            //     jsonWebToken: jsonWebToken,
+            //     csr: csr,
+            //     certificateType: certificateType
+            // )
+            // guard let cerData: Data = .init(base64Encoded: createCertificateResponse.data.attributes.certificateContent)
+            // else {
+            //     throw Error.unableToBase64DecodeCertificate(displayName: createCertificateResponse.data.attributes.displayName)
+            // }
+            // cer = try files.uniqueTemporaryPath() + "\(createCertificateResponse.data.id).cer"
+            // try files.write(cerData, to: cer)
+            // certificateId = createCertificateResponse.data.id
         }
     }
 }
