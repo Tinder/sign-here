@@ -306,25 +306,29 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             issuerID: issuerID,
             secretKey: try files.read(Path(itunesConnectKeyPath))
         )
+        let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(jsonWebToken: jsonWebToken)
         if autoRegenerate, profileName == nil {
             throw Error.profileNameMissing
         }
         guard let profileName, let profile = try? fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)
         else {
-            try createProvisioningProfile(jsonWebToken: jsonWebToken)
+            try createProvisioningProfile(jsonWebToken: jsonWebToken, deviceIDs: deviceIDs)
             return
         }
-        guard autoRegenerate
+        let profileDevices = Set(profile.relationships.devices.data.map { $0.id })
+        guard autoRegenerate, deviceIDs != profileDevices
         else {
             try save(profile: profile)
             log.append("The profile already exists")
             return
         }
-        
-        try createProvisioningProfile(jsonWebToken: jsonWebToken)
+        let missingDevices = deviceIDs.subtracting(profileDevices)
+        log.append("The profile will be regenerated because it is missing the device(s): \(missingDevices.joined(separator: ", "))")
+        try deleteProvisioningProfile(jsonWebToken: jsonWebToken, id: profile.id)
+        try createProvisioningProfile(jsonWebToken: jsonWebToken, deviceIDs: deviceIDs)
     }
 
-    private func createProvisioningProfile(jsonWebToken: String) throws {
+    private func createProvisioningProfile(jsonWebToken: String, deviceIDs: Set<String>) throws {
         let privateKey: Path = .init(privateKeyPath)
         let csr: Path = try createCSR(privateKey: privateKey)
         let jsonWebToken: String = try jsonWebTokenService.createToken(
@@ -345,7 +349,6 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         try importP12IdentityIntoKeychain(p12Identity: p12Identity, identityPassword: identityPassword)
         try importIntermediaryAppleCertificates()
         try updateKeychainPartitionList()
-        let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(jsonWebToken: jsonWebToken)
         let profileResponse: CreateProfileResponse = try iTunesConnectService.createProfile(
             jsonWebToken: jsonWebToken,
             bundleId: try iTunesConnectService.determineBundleIdITCId(
@@ -532,6 +535,14 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             jsonWebToken: jsonWebToken,
             name: name
         ).first
+    }
+
+    private func deleteProvisioningProfile(jsonWebToken: String, id: String) throws {
+        try iTunesConnectService.deleteProvisioningProfile(
+            jsonWebToken: jsonWebToken,
+            id: id
+        )
+        log.append("Deleted profile with id: \(id)")
     }
 
     private func save(profile: ProfileResponseData) throws {
