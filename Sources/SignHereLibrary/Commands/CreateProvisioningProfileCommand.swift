@@ -306,13 +306,22 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             issuerID: issuerID,
             secretKey: try files.read(Path(itunesConnectKeyPath))
         )
-        if let profileName {
-            try fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)
-        } else if autoRegenerate {
+        if autoRegenerate, profileName == nil {
             throw Error.profileNameMissing
-        } else {
-            try createProvisioningProfile(jsonWebToken: jsonWebToken)
         }
+        guard let profileName, let profile = try? fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)
+        else {
+            try createProvisioningProfile(jsonWebToken: jsonWebToken)
+            return
+        }
+        guard autoRegenerate
+        else {
+            try save(profile: profile)
+            log.append("The profile already exists")
+            return
+        }
+        
+        try createProvisioningProfile(jsonWebToken: jsonWebToken)
     }
 
     private func createProvisioningProfile(jsonWebToken: String) throws {
@@ -350,11 +359,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             profileType: profileType,
             profileName: profileName
         )
-        guard let profileData: Data = .init(base64Encoded: profileResponse.data.attributes.profileContent)
-        else {
-            throw Error.unableToBase64DecodeProfile(name: profileResponse.data.attributes.name)
-        }
-        try files.write(profileData, to: .init(outputPath))
+        try save(profile: profileResponse.data)
         log.append(profileResponse.data.id)
     }
 
@@ -522,32 +527,18 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         }
     }
 
-    private func fetchProvisioningProfile(jsonWebToken: String, name: String) throws {
-        if let provisioningProfile = try iTunesConnectService.fetchProvisioningProfile(
+    private func fetchProvisioningProfile(jsonWebToken: String, name: String) throws -> ProfileResponseData? {
+        try iTunesConnectService.fetchProvisioningProfile(
             jsonWebToken: jsonWebToken,
             name: name
-        ).first {
-            // guard let data: Data = .init(base64Encoded: fetchedActiveCertificate.attributes.certificateContent)
-            // else {
-            //     throw Error.unableToBase64DecodeCertificate(displayName: fetchedActiveCertificate.attributes.displayName)
-            // }
-            // cer = try files.uniqueTemporaryPath() + "\(fetchedActiveCertificate.id).cer"
-            // try files.write(data, to: cer)
-            // certificateId = fetchedActiveCertificate.id
-            print(provisioningProfile)
-        } else {
-            // let createCertificateResponse: CreateCertificateResponse = try iTunesConnectService.createCertificate(
-            //     jsonWebToken: jsonWebToken,
-            //     csr: csr,
-            //     certificateType: certificateType
-            // )
-            // guard let cerData: Data = .init(base64Encoded: createCertificateResponse.data.attributes.certificateContent)
-            // else {
-            //     throw Error.unableToBase64DecodeCertificate(displayName: createCertificateResponse.data.attributes.displayName)
-            // }
-            // cer = try files.uniqueTemporaryPath() + "\(createCertificateResponse.data.id).cer"
-            // try files.write(cerData, to: cer)
-            // certificateId = createCertificateResponse.data.id
+        ).first
+    }
+
+    private func save(profile: ProfileResponseData) throws {
+        guard let profileData: Data = .init(base64Encoded: profile.attributes.profileContent)
+        else {
+            throw Error.unableToBase64DecodeProfile(name: profile.attributes.name)
         }
+        try files.write(profileData, to: .init(outputPath))
     }
 }
