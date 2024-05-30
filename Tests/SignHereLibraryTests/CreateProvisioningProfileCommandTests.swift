@@ -57,7 +57,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
             bundleIdentifierName: "bundleIdentifierName",
             platform: "platform",
-            profileName: "profileName"
+            profileName: "profileName",
+            autoRegenerate: false
         )
         isRecording = false
     }
@@ -162,7 +163,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
             "bundleIdentifierName": "bundleIdentifierName",
             "platform": "platform",
-            "profileName": "profileName"
+            "profileName": "profileName",
+            "autoRegenerate": false
         }
         """.utf8)
 
@@ -216,7 +218,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
-
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return []
+        }
         // WHEN
         try subject.run()
 
@@ -258,6 +262,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         }
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return []
         }
 
         // WHEN
@@ -321,10 +328,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
 
     private func createCreateProfileResponse() -> CreateProfileResponse {
         .init(
-            data: CreateProfileResponse.CreateProfileResponseData(
+            data: ProfileResponseData(
                 id: "createdProfileITCID",
                 type: "type",
-                attributes: CreateProfileResponse.CreateProfileResponseData.Attributes(
+                attributes: ProfileResponseData.Attributes(
                     profileContent: "dGVzdAo=",
                     uuid: "uuid",
                     name: "createdProfileName",
@@ -333,6 +340,11 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
                     profileState: "profileState",
                     profileType: "profileType",
                     expirationDate: .init(timeIntervalSince1970: 100)
+                ),
+                relationships: ProfileResponseData.Relationships(
+                    devices: ProfileResponseData.Relationships.Devices(
+                        data: []
+                    )
                 )
             )
         )

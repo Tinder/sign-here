@@ -808,10 +808,10 @@ final class iTunesConnectServiceTests: XCTestCase {
 
     private func createCreateProfileResponse() -> CreateProfileResponse {
         .init(
-            data: CreateProfileResponse.CreateProfileResponseData(
+            data: ProfileResponseData(
                 id: "createdProfileITCID",
                 type: "type",
-                attributes: CreateProfileResponse.CreateProfileResponseData.Attributes(
+                attributes: ProfileResponseData.Attributes(
                     profileContent: "dGVzdAo=",
                     uuid: "uuid",
                     name: "createdProfileName",
@@ -820,6 +820,11 @@ final class iTunesConnectServiceTests: XCTestCase {
                     profileState: "profileState",
                     profileType: "profileType",
                     expirationDate: .init(timeIntervalSince1970: 100)
+                ),
+                relationships: ProfileResponseData.Relationships(
+                    devices: ProfileResponseData.Relationships.Devices(
+                        data: []
+                    )
                 )
             )
         )

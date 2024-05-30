@@ -328,11 +328,6 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     private func createProvisioningProfile(jsonWebToken: String, deviceIDs: Set<String>) throws {
         let privateKey: Path = .init(privateKeyPath)
         let csr: Path = try createCSR(privateKey: privateKey)
-        let jsonWebToken: String = try jsonWebTokenService.createToken(
-            keyIdentifier: keyIdentifier,
-            issuerID: issuerID,
-            secretKey: try files.read(Path(itunesConnectKeyPath))
-        )
         let tuple: (cer: Path, certificateId: String) = try fetchOrCreateCertificate(jsonWebToken: jsonWebToken, csr: csr)
         let cer: Path = tuple.cer
         let certificateId: String = tuple.certificateId

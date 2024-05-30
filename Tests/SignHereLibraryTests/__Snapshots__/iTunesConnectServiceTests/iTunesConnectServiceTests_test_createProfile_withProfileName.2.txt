@@ -1,5 +1,5 @@
 ▿ CreateProfileResponse
-  ▿ data: CreateProfileResponseData
+  ▿ data: ProfileResponseData
     ▿ attributes: Attributes
       - createdDate: 1970-01-01T00:00:00Z
       - expirationDate: 1970-01-01T00:01:40Z
@@ -10,4 +10,7 @@
       - profileType: "profileType"
       - uuid: "uuid"
     - id: "createdProfileITCID"
+    ▿ relationships: Relationships
+      ▿ devices: Devices
+        - data: 0 elements
     - type: "type"
