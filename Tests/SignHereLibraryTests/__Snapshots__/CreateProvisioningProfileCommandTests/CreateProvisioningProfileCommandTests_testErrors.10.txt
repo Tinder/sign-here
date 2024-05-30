@@ -1,0 +1,1 @@
+--auto-regenerate flag requires that you include a profile name using the argument --profile-name

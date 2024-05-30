@@ -143,6 +143,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             ).description,
             as: .lines
         )
+        assertSnapshot(
+            matching: CreateProvisioningProfileCommand.Error.profileNameMissing.description,
+            as: .lines
+        )
     }
 
     func test_initDecoder() throws {
