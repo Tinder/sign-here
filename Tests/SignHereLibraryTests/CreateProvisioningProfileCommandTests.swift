@@ -189,6 +189,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
         XCTAssertEqual(subject.profileName, "profileName")
+        XCTAssertEqual(subject.autoRegenerate, false)
     }
 
     func test_execute_alreadyActiveCertificate() throws {
@@ -237,6 +238,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             matching: log.appendArgValues,
             as: .dump
         )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
     }
 
     func test_execute_noActiveCertificates() throws {
@@ -283,6 +287,54 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             matching: log.appendArgValues,
             as: .dump
         )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_profileAlreadyExists() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = []
+
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8),
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return []
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return [self.createCreateProfileResponse().data]
+        }
+        // WHEN
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(fileDataReads.count, 0)
     }
 
     private func createDownloadCertificateResponse() -> DownloadCertificateResponse {
