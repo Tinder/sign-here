@@ -20,12 +20,12 @@ struct ProfileResponseData: Codable {
     }
     struct Relationships: Codable {
         struct Devices: Codable {
-            struct DevicesData: Codable {
+            struct Data: Codable {
                 var id: String
                 var type: String
             }
 
-            var data: [DevicesData]
+            var data: [Data]
         }
         var devices: Devices
     }
