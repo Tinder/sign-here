@@ -372,7 +372,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         let profileName = profileName ?? "\(certificateId)_\(profileType)_\(clock.now().timeIntervalSince1970)"
         var devices: CreateProfileRequest.CreateProfileRequestData.Relationships.Devices? = nil
         // ME: App Store profiles cannot use UDIDs
-        if !["IOS_APP_STORE", "MAC_APP_STORE", "TVOS_APP_STORE", "MAC_CATALYST_APP_STORE"].contains(profileType) {
+        if ProfileType(rawValue: profileType).usesDevices {
             devices = .init(
                 data: deviceIDs.sorted().map {
                     CreateProfileRequest.CreateProfileRequestData.Relationships.Devices.DevicesData(

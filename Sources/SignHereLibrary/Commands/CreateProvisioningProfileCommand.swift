@@ -315,15 +315,12 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             try createProvisioningProfile(jsonWebToken: jsonWebToken, deviceIDs: deviceIDs)
             return
         }
-        let profileDevices = Set(profile.relationships.devices.data.map { $0.id })
-        guard autoRegenerate, deviceIDs != profileDevices
+        guard autoRegenerate, shouldRegenerate(profile: profile, with: deviceIDs)
         else {
             try save(profile: profile)
             log.append("The profile already exists")
             return
         }
-        let missingDevices = deviceIDs.subtracting(profileDevices)
-        log.append("The profile will be regenerated because it is missing the device(s): \(missingDevices.joined(separator: ", "))")
         try deleteProvisioningProfile(jsonWebToken: jsonWebToken, id: profile.id)
         try createProvisioningProfile(jsonWebToken: jsonWebToken, deviceIDs: deviceIDs)
     }
@@ -551,5 +548,16 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             throw Error.unableToBase64DecodeProfile(name: profile.attributes.name)
         }
         try files.write(profileData, to: .init(outputPath))
+    }
+
+    private func shouldRegenerate(profile: ProfileResponseData, with deviceIDs: Set<String>) -> Bool {
+        guard ProfileType(rawValue: profileType).usesDevices else { return false }
+        let profileDevices = Set(profile.relationships.devices.data.map { $0.id })
+        let shouldRegenerate = deviceIDs != profileDevices
+        if shouldRegenerate {
+            let missingDevices = deviceIDs.subtracting(profileDevices)
+            log.append("The profile will be regenerated because it is missing the device(s): \(missingDevices.joined(separator: ", "))")
+        }
+        return shouldRegenerate
     }
 }
