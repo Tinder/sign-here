@@ -289,6 +289,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
     func test_execute_profileAlreadyExists() throws {
         // GIVEN
         var executeLaunchPaths: [ShellOutput] = []
+        let responseObject = createCreateProfileResponse().data
 
         shell.executeLaunchPathHandler = { _, _, _, _ in
             XCTAssert(false, "Shouldn't be executed")
@@ -313,9 +314,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             return self.createCreateProfileResponse()
         }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
-            return [self.createCreateProfileResponse().data]
+            return [responseObject]
         }
         // WHEN
+        subject.profileName = responseObject.attributes.name
         try subject.run()
 
         // THEN
@@ -334,6 +336,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
     func test_execute_profileShouldRegenerateWithNewDevices() throws {
         // GIVEN
         var previousProfileWasDeleted = false
+        let responseObject = createCreateProfileResponse().data
         
         files.uniqueTemporaryPathHandler = {
             Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
@@ -371,9 +374,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             previousProfileWasDeleted = true
         }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
-            return [self.createCreateProfileResponse().data]
+            return [responseObject]
         }
         // WHEN
+        subject.profileName = responseObject.attributes.name
         subject.autoRegenerate = true
         try subject.run()
 
@@ -395,6 +399,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
     func test_execute_profileShouldNotRegenerateWithSameDevices() throws {
         // GIVEN
         var executeLaunchPaths: [ShellOutput] = []
+        let responseObject = createCreateProfileResponse().data
 
         shell.executeLaunchPathHandler = { _, _, _, _ in
             XCTAssert(false, "Shouldn't be executed")
@@ -419,9 +424,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             return self.createCreateProfileResponse()
         }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
-            return [self.createCreateProfileResponse().data]
+            return [responseObject]
         }
         // WHEN
+        subject.profileName = responseObject.attributes.name
         subject.autoRegenerate = true
         try subject.run()
 

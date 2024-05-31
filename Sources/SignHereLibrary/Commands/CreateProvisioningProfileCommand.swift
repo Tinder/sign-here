@@ -307,9 +307,6 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             secretKey: try files.read(Path(itunesConnectKeyPath))
         )
         let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(jsonWebToken: jsonWebToken)
-        if autoRegenerate, profileName == nil {
-            throw Error.profileNameMissing
-        }
         guard let profileName, let profile = try? fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)
         else {
             try createProvisioningProfile(jsonWebToken: jsonWebToken, deviceIDs: deviceIDs)
@@ -555,4 +552,10 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         }
         return shouldRegenerate
     }
+
+     mutating internal func validate() throws {
+        if autoRegenerate, profileName == nil {
+            throw Error.profileNameMissing
+        }
+     }
 }

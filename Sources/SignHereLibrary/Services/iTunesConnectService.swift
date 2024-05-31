@@ -448,7 +448,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         jsonWebToken: String,
         name: String
     ) throws -> [ProfileResponseData] {
-                var urlComponents: URLComponents = .init()
+        var urlComponents: URLComponents = .init()
         urlComponents.scheme = Constants.httpsScheme
         urlComponents.host = Constants.itcHost
         urlComponents.path = "/v1/profiles"
