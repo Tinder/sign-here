@@ -157,8 +157,8 @@ OPTIONS:
 
                           /DC=org/DC=OpenSSL/DC=users/UID=123456+CN=JohnDoe
   --auto-regenerate
-                          Defines if the profile should be regenated in case it 
-                          already exists (optional)
+                          Defines if the profile should be regenerated in case
+                          it already exists (optional)
   -h, --help              Show help information.
 
 
