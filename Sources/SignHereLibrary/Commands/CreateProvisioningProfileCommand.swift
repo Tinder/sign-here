@@ -526,7 +526,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         try iTunesConnectService.fetchProvisioningProfile(
             jsonWebToken: jsonWebToken,
             name: name
-        ).first
+        ).first(where: { $0.attributes.name == name })
     }
 
     private func deleteProvisioningProfile(jsonWebToken: String, id: String) throws {
