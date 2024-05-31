@@ -1,0 +1,10 @@
+▿ 3 elements
+  ▿ (2 elements)
+    - .0: "The profile will be regenerated because it is missing the device(s): deviceID"
+    - .1: "\n"
+  ▿ (2 elements)
+    - .0: "Deleted profile with id: createdProfileITCID"
+    - .1: "\n"
+  ▿ (2 elements)
+    - .0: "createdProfileITCID"
+    - .1: "\n"

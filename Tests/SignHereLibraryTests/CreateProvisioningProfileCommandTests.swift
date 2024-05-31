@@ -223,9 +223,6 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
-        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
-            return []
-        }
         // WHEN
         try subject.run()
 
@@ -270,9 +267,6 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         }
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
-        }
-        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
-            return []
         }
 
         // WHEN
@@ -335,6 +329,67 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         )
 
         XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_profileShouldRegenerateWithNewDevices() throws {
+        // GIVEN
+        var previousProfileWasDeleted = false
+        
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importP12IdentityIntoKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importIntermediateAppleCertificate".utf8), errorData: .init()),
+            .init(status: 0, data: .init("updateKeychainPartitionList".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set(["deviceID"])
+        }
+        iTunesConnectService.deleteProvisioningProfileHandler = { _, _ in
+            previousProfileWasDeleted = true
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return [self.createCreateProfileResponse().data]
+        }
+        // WHEN
+        subject.autoRegenerate = true
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+        XCTAssertTrue(previousProfileWasDeleted)
     }
 
     private func createDownloadCertificateResponse() -> DownloadCertificateResponse {
