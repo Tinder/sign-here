@@ -392,6 +392,52 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertTrue(previousProfileWasDeleted)
     }
 
+    func test_execute_profileShouldNotRegenerateWithSameDevices() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = []
+
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8),
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return []
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return [self.createCreateProfileResponse().data]
+        }
+        // WHEN
+        subject.autoRegenerate = true
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
     private func createDownloadCertificateResponse() -> DownloadCertificateResponse {
         DownloadCertificateResponse(
             data: [
