@@ -186,7 +186,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     """)
     internal var certificateSigningRequestSubject: String
 
-    @Flag(help: "Determines if the profile should be regenated in case it already exists (optional)")
+    @Flag(help: "Defines if the profile should be regenated in case it already exists (optional)")
     internal var autoRegenerate = false
 
     private let files: Files

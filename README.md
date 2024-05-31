@@ -141,8 +141,7 @@ OPTIONS:
                           OpenSSL documentation for this flag
                           (https://www.openssl.org/docs/manmaster/man1/openssl-req.html):
 
-Sets
-                          subject name for new request or supersedes the
+                          Sets subject name for new request or supersedes the
                           subject name when processing a certificate request.
 
                           The arg must be formatted as
@@ -157,6 +156,9 @@ Sets
                           specify the members of the set. Example:
 
                           /DC=org/DC=OpenSSL/DC=users/UID=123456+CN=JohnDoe
+  --auto-regenerate
+                          Defines if the profile should be regenated in case it 
+                          already exists (optional)
   -h, --help              Show help information.
 
 
