@@ -57,7 +57,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
             bundleIdentifierName: "bundleIdentifierName",
             platform: "platform",
-            profileName: "profileName"
+            profileName: "profileName",
+            autoRegenerate: false
         )
         isRecording = false
     }
@@ -142,6 +143,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             ).description,
             as: .lines
         )
+        assertSnapshot(
+            matching: CreateProvisioningProfileCommand.Error.profileNameMissing.description,
+            as: .lines
+        )
     }
 
     func test_initDecoder() throws {
@@ -162,7 +167,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
             "bundleIdentifierName": "bundleIdentifierName",
             "platform": "platform",
-            "profileName": "profileName"
+            "profileName": "profileName",
+            "autoRegenerate": false
         }
         """.utf8)
 
@@ -183,6 +189,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
         XCTAssertEqual(subject.profileName, "profileName")
+        XCTAssertEqual(subject.autoRegenerate, false)
     }
 
     func test_execute_alreadyActiveCertificate() throws {
@@ -216,7 +223,6 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
-
         // WHEN
         try subject.run()
 
@@ -229,6 +235,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             matching: log.appendArgValues,
             as: .dump
         )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
     }
 
     func test_execute_noActiveCertificates() throws {
@@ -272,6 +281,167 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             matching: log.appendArgValues,
             as: .dump
         )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_profileAlreadyExists() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = []
+        let responseObject = createCreateProfileResponse().data
+
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8),
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return []
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return [responseObject]
+        }
+        // WHEN
+        subject.profileName = responseObject.attributes.name
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_profileShouldRegenerateWithNewDevices() throws {
+        // GIVEN
+        var previousProfileWasDeleted = false
+        let responseObject = createCreateProfileResponse().data
+        
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importP12IdentityIntoKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importIntermediateAppleCertificate".utf8), errorData: .init()),
+            .init(status: 0, data: .init("updateKeychainPartitionList".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set(["deviceID"])
+        }
+        iTunesConnectService.deleteProvisioningProfileHandler = { _, _ in
+            previousProfileWasDeleted = true
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return [responseObject]
+        }
+        // WHEN
+        subject.profileName = responseObject.attributes.name
+        subject.autoRegenerate = true
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+        XCTAssertTrue(previousProfileWasDeleted)
+    }
+
+    func test_execute_profileShouldNotRegenerateWithSameDevices() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = []
+        let responseObject = createCreateProfileResponse().data
+
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8),
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return []
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            XCTAssert(false, "Shouldn't be executed")
+            return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
+            return [responseObject]
+        }
+        // WHEN
+        subject.profileName = responseObject.attributes.name
+        subject.autoRegenerate = true
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(fileDataReads.count, 0)
     }
 
     private func createDownloadCertificateResponse() -> DownloadCertificateResponse {
@@ -321,10 +491,10 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
 
     private func createCreateProfileResponse() -> CreateProfileResponse {
         .init(
-            data: CreateProfileResponse.CreateProfileResponseData(
+            data: ProfileResponseData(
                 id: "createdProfileITCID",
                 type: "type",
-                attributes: CreateProfileResponse.CreateProfileResponseData.Attributes(
+                attributes: ProfileResponseData.Attributes(
                     profileContent: "dGVzdAo=",
                     uuid: "uuid",
                     name: "createdProfileName",
@@ -333,6 +503,11 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
                     profileState: "profileState",
                     profileType: "profileType",
                     expirationDate: .init(timeIntervalSince1970: 100)
+                ),
+                relationships: ProfileResponseData.Relationships(
+                    devices: ProfileResponseData.Relationships.Devices(
+                        data: []
+                    )
                 )
             )
         )

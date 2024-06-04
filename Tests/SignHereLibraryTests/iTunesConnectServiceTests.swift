@@ -713,6 +713,59 @@ final class iTunesConnectServiceTests: XCTestCase {
         }
     }
 
+    func test_fetchProfile() throws {
+        // GIVEN
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createFetchProfileResponse()),
+        ]
+        network.executeHandler = { _ in
+            networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        let value: ProfileResponseData? = try subject.fetchProvisioningProfile(
+            jsonWebToken: "jsonWebToken",
+            name: "Test"
+        ).first
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
+
+        assertSnapshot(
+            matching: value,
+            as: .dump
+        )
+    }
+
+    func test_fetchProfile_decodeError() throws {
+        // GIVEN
+        var networkExecutes: [Data] = [
+            .init()
+        ]
+        network.executeHandler = { _ in
+            networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        XCTAssertThrowsError(try subject.fetchProvisioningProfile(
+            jsonWebToken: "jsonWebToken",
+            name: "Test"
+        ).first) {
+            if case iTunesConnectServiceImp.Error.unableToDecodeResponse = $0 {
+                return
+            }
+            XCTFail($0.localizedDescription)
+        }
+
+        // THEN
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
+    }
+
     private func createJSONEncoder() -> JSONEncoder {
         let jsonEncoder: JSONEncoder = .init()
         let dateFormatter: DateFormatter = .init()
@@ -808,10 +861,10 @@ final class iTunesConnectServiceTests: XCTestCase {
 
     private func createCreateProfileResponse() -> CreateProfileResponse {
         .init(
-            data: CreateProfileResponse.CreateProfileResponseData(
+            data: ProfileResponseData(
                 id: "createdProfileITCID",
                 type: "type",
-                attributes: CreateProfileResponse.CreateProfileResponseData.Attributes(
+                attributes: ProfileResponseData.Attributes(
                     profileContent: "dGVzdAo=",
                     uuid: "uuid",
                     name: "createdProfileName",
@@ -820,8 +873,42 @@ final class iTunesConnectServiceTests: XCTestCase {
                     profileState: "profileState",
                     profileType: "profileType",
                     expirationDate: .init(timeIntervalSince1970: 100)
+                ),
+                relationships: ProfileResponseData.Relationships(
+                    devices: ProfileResponseData.Relationships.Devices(
+                        data: []
+                    )
                 )
             )
+        )
+    }
+    
+    private func createFetchProfileResponse() -> GetProfilesResponse {
+        .init(
+            data: [ProfileResponseData(
+                id: "getProfileITCID",
+                type: "type",
+                attributes: ProfileResponseData.Attributes(
+                    profileContent: "dGVzdAo=",
+                    uuid: "uuid",
+                    name: "getProfileName",
+                    platform: "platform",
+                    createdDate: .init(timeIntervalSince1970: 0),
+                    profileState: "profileState",
+                    profileType: "profileType",
+                    expirationDate: .init(timeIntervalSince1970: 100)
+                ),
+                relationships: ProfileResponseData.Relationships(
+                    devices: ProfileResponseData.Relationships.Devices(
+                        data: [
+                            ProfileResponseData.Relationships.Devices.Data(
+                                id: "1234",
+                                type: "device"
+                            )
+                        ]
+                    )
+                )
+            )]
         )
     }
 }

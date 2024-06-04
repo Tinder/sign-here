@@ -1,0 +1,5 @@
+curl \
+	--header "Accept: application/json" \
+	--header "Authorization: Bearer jsonWebToken" \
+	--header "Content-Type: application/json" \
+	"https://api.appstoreconnect.apple.com/v1/profiles?filter%5Bname%5D=Test&include=devices"

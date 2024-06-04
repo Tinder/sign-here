@@ -42,6 +42,10 @@ internal protocol iTunesConnectService {
         jsonWebToken: String,
         id: String
     ) throws
+    func fetchProvisioningProfile(
+        jsonWebToken: String,
+        name: String
+    ) throws -> [ProfileResponseData]
 }
 
 internal class iTunesConnectServiceImp: iTunesConnectService {
@@ -368,7 +372,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         let profileName = profileName ?? "\(certificateId)_\(profileType)_\(clock.now().timeIntervalSince1970)"
         var devices: CreateProfileRequest.CreateProfileRequestData.Relationships.Devices? = nil
         // ME: App Store profiles cannot use UDIDs
-        if !["IOS_APP_STORE", "MAC_APP_STORE", "TVOS_APP_STORE", "MAC_CATALYST_APP_STORE"].contains(profileType) {
+        if ProfileType(rawValue: profileType).usesDevices {
             devices = .init(
                 data: deviceIDs.sorted().map {
                     CreateProfileRequest.CreateProfileRequestData.Relationships.Devices.DevicesData(
@@ -437,6 +441,39 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         guard tuple.statusCode == 204
         else {
             throw Error.unableToDeleteProvisioningProfile(id: id, responseData: tuple.data)
+        }
+    }
+
+    func fetchProvisioningProfile(
+        jsonWebToken: String,
+        name: String
+    ) throws -> [ProfileResponseData] {
+        var urlComponents: URLComponents = .init()
+        urlComponents.scheme = Constants.httpsScheme
+        urlComponents.host = Constants.itcHost
+        urlComponents.path = "/v1/profiles"
+        urlComponents.queryItems = [
+            .init(name: "filter[name]", value: name),
+            .init(name: "include", value: "devices")
+        ]
+        guard let url: URL = urlComponents.url
+        else {
+            throw Error.unableToCreateURL(urlComponents: urlComponents)
+        }
+        var request: URLRequest = .init(url: url)
+        request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
+        request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: Constants.contentTypeHeaderName)
+        request.httpMethod = "GET"
+        let jsonDecoder: JSONDecoder = createITCApiJSONDecoder()
+        let data: Data = try network.execute(request: request)
+        do {
+            return try jsonDecoder.decode(
+                GetProfilesResponse.self,
+                from: data
+            ).data
+        } catch let decodingError as DecodingError {
+            throw Error.unableToDecodeResponse(responseData: data, decodingError: decodingError)
         }
     }
 
