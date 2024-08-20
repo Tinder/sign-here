@@ -3,5 +3,5 @@ curl \
 	--header "Accept: application/json" \
 	--header "Authorization: Bearer jsonWebToken" \
 	--header "Content-Type: application/json" \
-	--data "{\"data\":{\"attributes\":{\"certificateType\":\"certificateType\",\"csrContent\":\"\"},\"type\":\"certificates\"}}" \
+	--data "{\"data\":{\"attributes\":{\"csrContent\":\"\",\"certificateType\":\"certificateType\"},\"type\":\"certificates\"}}" \
 	"https://api.appstoreconnect.apple.com/v1/certificates"

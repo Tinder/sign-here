@@ -1,0 +1,3 @@
+curl \
+	--header "Authorization: Bearer jsonWebToken" \
+	"https://api.enterprise.developer.apple.com/v1/certificates?filter%5BcertificateType%5D=certificateType&limit=200"

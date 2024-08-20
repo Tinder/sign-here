@@ -32,7 +32,8 @@ final class DeleteProvisioningProfileCommandTests: XCTestCase {
             provisioningProfileId: "provisioningProfileId",
             keyIdentifier: "keyIdentifier",
             issuerID: "issuerID",
-            itunesConnectKeyPath: "/itunesConnectKeyPath"
+            itunesConnectKeyPath: "/itunesConnectKeyPath",
+            enterprise: false
         )
     }
 
@@ -53,7 +54,8 @@ final class DeleteProvisioningProfileCommandTests: XCTestCase {
             "provisioningProfileId": "provisioningProfileId",
             "keyIdentifier": "keyIdentifier",
             "issuerID": "issuerID",
-            "itunesConnectKeyPath": "/itunesConnectKeyPath"
+            "itunesConnectKeyPath": "/itunesConnectKeyPath",
+            "enterprise": true
         }
         """.utf8)
 
@@ -65,6 +67,7 @@ final class DeleteProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.keyIdentifier, "keyIdentifier")
         XCTAssertEqual(subject.issuerID, "issuerID")
         XCTAssertEqual(subject.itunesConnectKeyPath, "/itunesConnectKeyPath")
+        XCTAssertTrue(subject.enterprise)
     }
 
     func test_execute() throws {

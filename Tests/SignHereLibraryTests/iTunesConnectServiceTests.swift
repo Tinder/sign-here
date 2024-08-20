@@ -33,7 +33,8 @@ final class iTunesConnectServiceTests: XCTestCase {
             network: network,
             files: files,
             shell: shell,
-            clock: clock
+            clock: clock,
+            enterprise: false
         )
 
         isRecording = false
@@ -53,7 +54,11 @@ final class iTunesConnectServiceTests: XCTestCase {
             network: network,
             files: files,
             shell: shell,
-            clock: clock
+            clock: clock,
+            enterprise: true
+        ))
+        XCTAssertNotNil(iTunesConnectServiceImp(
+            enterprise: true
         ))
     }
 
@@ -114,6 +119,61 @@ final class iTunesConnectServiceTests: XCTestCase {
 
     func test_fetchActiveCertificates_privateKeyMatches() throws {
         // GIVEN
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("modulus".utf8), errorData: .init()), // ME: Private Key Modulus
+            .init(status: 0, data: .init("modulus".utf8), errorData: .init()) // ME: Certificate Modulus
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("CSRContent".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        let jsonEncoder: JSONEncoder = createJSONEncoder()
+        var networkExecutes: [Data] = [
+            try jsonEncoder.encode(createDownloadCertificateResponse(nextURL: nil))
+        ]
+        network.executeHandler = { _ in
+            networkExecutes.removeFirst()
+        }
+
+        // WHEN
+        let value: [DownloadCertificateResponse.DownloadCertificateResponseData] = try subject.fetchActiveCertificates(
+            jsonWebToken: "jsonWebToken",
+            opensslPath: "/opensslPath",
+            privateKeyPath: "/privateKeyPath",
+            certificateType: "certificateType"
+        )
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        for argValue in network.executeArgValues {
+            assertSnapshot(matching: argValue, as: .curl)
+        }
+        assertSnapshot(
+            matching: value,
+            as: .dump
+        )
+    }
+
+    func test_fetchActiveCertificates_privateKeyMatches_enterprise() throws {
+        // GIVEN
+        subject = iTunesConnectServiceImp(
+            network: network,
+            files: files,
+            shell: shell,
+            clock: clock,
+            enterprise: true
+        )
         files.uniqueTemporaryPathHandler = {
             Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
         }
@@ -882,7 +942,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             )
         )
     }
-    
+
     private func createFetchProfileResponse() -> GetProfilesResponse {
         .init(
             data: [ProfileResponseData(

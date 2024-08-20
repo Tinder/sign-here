@@ -58,7 +58,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             bundleIdentifierName: "bundleIdentifierName",
             platform: "platform",
             profileName: "profileName",
-            autoRegenerate: false
+            autoRegenerate: false,
+            enterprise: false
         )
         isRecording = false
     }
@@ -337,7 +338,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         // GIVEN
         var previousProfileWasDeleted = false
         let responseObject = createCreateProfileResponse().data
-        
+
         files.uniqueTemporaryPathHandler = {
             Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
         }

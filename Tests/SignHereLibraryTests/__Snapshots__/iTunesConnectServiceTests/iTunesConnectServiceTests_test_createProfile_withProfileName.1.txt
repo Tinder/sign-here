@@ -3,5 +3,5 @@ curl \
 	--header "Accept: application/json" \
 	--header "Authorization: Bearer jsonWebToken" \
 	--header "Content-Type: application/json" \
-	--data "{\"data\":{\"attributes\":{\"name\":\"mySpecialProfile\",\"profileType\":\"profileType\"},\"type\":\"profiles\",\"relationships\":{\"devices\":{\"data\":[{\"id\":\"deviceId\",\"type\":\"devices\"}]},\"certificates\":{\"data\":[{\"id\":\"certificateId\",\"type\":\"certificates\"}]},\"bundleId\":{\"data\":{\"id\":\"bundleId\",\"type\":\"bundleIds\"}}}}}" \
+	--data "{\"data\":{\"attributes\":{\"profileType\":\"profileType\",\"name\":\"mySpecialProfile\"},\"relationships\":{\"certificates\":{\"data\":[{\"id\":\"certificateId\",\"type\":\"certificates\"}]},\"devices\":{\"data\":[{\"id\":\"deviceId\",\"type\":\"devices\"}]},\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"bundleId\"}}},\"type\":\"profiles\"}}" \
 	"https://api.appstoreconnect.apple.com/v1/profiles"

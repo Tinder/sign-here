@@ -115,23 +115,39 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         static let contentTypeHeaderName: String = "Content-Type"
         static let httpsScheme: String = "https"
         static let itcHost: String = "api.appstoreconnect.apple.com"
+        static let enterpriseHost: String = "api.enterprise.developer.apple.com"
     }
 
     private let network: Network
     private let files: Files
     private let shell: Shell
     private let clock: Clock
+    private let enterprise: Bool
 
     init(
         network: Network,
         files: Files,
         shell: Shell,
-        clock: Clock
+        clock: Clock,
+        enterprise: Bool
     ) {
         self.network = network
         self.files = files
         self.shell = shell
         self.clock = clock
+        self.enterprise = enterprise
+    }
+
+    convenience init(
+        enterprise: Bool
+    ) {
+        self.init(
+            network: NetworkImp(),
+            files: FilesImp(),
+            shell: ShellImp(),
+            clock: ClockImp(),
+            enterprise: enterprise
+        )
     }
 
     func fetchActiveCertificates(
@@ -141,18 +157,13 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         certificateType: String
     ) throws -> [DownloadCertificateResponse.DownloadCertificateResponseData] {
         let currentDate: Date = clock.now()
-        var urlComponents: URLComponents = .init()
-        urlComponents.scheme = Constants.httpsScheme
-        urlComponents.host = Constants.itcHost
-        urlComponents.path = "/v1/certificates"
-        urlComponents.queryItems = [
-            .init(name: "filter[certificateType]", value: certificateType),
-            .init(name: "limit", value: "200")
-        ]
-        guard let url: URL = urlComponents.url
-        else {
-            throw Error.unableToCreateURL(urlComponents: urlComponents)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/certificates",
+            queryItems: [
+                .init(name: "filter[certificateType]", value: certificateType),
+                .init(name: "limit", value: "200")
+            ]
+        )
         var certificatesData: [DownloadCertificateResponse.DownloadCertificateResponseData] = []
         var request: URLRequest = .init(url: url)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
@@ -198,11 +209,9 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         csr: Path,
         certificateType: String
     ) throws -> CreateCertificateResponse {
-        let urlString: String = "https://api.appstoreconnect.apple.com/v1/certificates"
-        guard let url: URL = .init(string: urlString)
-        else {
-            throw Error.invalidURL(string: urlString)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/certificates"
+        )
         var request: URLRequest = .init(url: url)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.httpBody = try JSONEncoder().encode(
@@ -236,19 +245,14 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         bundleIdentifierName: String?,
         platform: String
     ) throws -> String {
-        var urlComponents: URLComponents = .init()
-        urlComponents.scheme = Constants.httpsScheme
-        urlComponents.host = Constants.itcHost
-        urlComponents.path = "/v1/bundleIds"
-        urlComponents.queryItems = [
-            .init(name: "filter[identifier]", value: bundleIdentifier),
-            .init(name: "filter[platform]", value: "IOS"),
-            .init(name: "limit", value: "200")
-        ]
-        guard let url: URL = urlComponents.url
-        else {
-            throw Error.unableToCreateURL(urlComponents: urlComponents)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/bundleIds",
+            queryItems: [
+                .init(name: "filter[identifier]", value: bundleIdentifier),
+                .init(name: "filter[platform]", value: "IOS"),
+                .init(name: "limit", value: "200")
+            ]
+        )
         var request: URLRequest = .init(url: url)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
@@ -297,19 +301,14 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
     }
 
     func fetchITCDeviceIDs(jsonWebToken: String) throws -> Set<String> {
-        var urlComponents: URLComponents = .init()
-        urlComponents.scheme = Constants.httpsScheme
-        urlComponents.host = Constants.itcHost
-        urlComponents.path = "/v1/devices"
-        urlComponents.queryItems = [
-            .init(name: "filter[status]", value: "ENABLED"),
-            .init(name: "filter[platform]", value: "IOS"),
-            .init(name: "limit", value: "200")
-        ]
-        guard let url: URL = urlComponents.url
-        else {
-            throw Error.unableToCreateURL(urlComponents: urlComponents)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/devices",
+            queryItems: [
+                .init(name: "filter[status]", value: "ENABLED"),
+                .init(name: "filter[platform]", value: "IOS"),
+                .init(name: "limit", value: "200")
+            ]
+        )
         var request: URLRequest = .init(url: url)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
@@ -359,11 +358,9 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         profileType: String,
         profileName: String? = nil
     ) throws -> CreateProfileResponse {
-        let urlString: String = "https://api.appstoreconnect.apple.com/v1/profiles"
-        guard let url: URL = .init(string: urlString)
-        else {
-            throw Error.invalidURL(string: urlString)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/profiles"
+        )
         var request: URLRequest = .init(url: url)
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: Constants.contentTypeHeaderName)
@@ -424,14 +421,9 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         jsonWebToken: String,
         id: String
     ) throws {
-        var urlComponents: URLComponents = .init()
-        urlComponents.scheme = Constants.httpsScheme
-        urlComponents.host = Constants.itcHost
-        urlComponents.path = "/v1/profiles/\(id)"
-        guard let url: URL = urlComponents.url
-        else {
-            throw Error.unableToCreateURL(urlComponents: urlComponents)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/profiles/\(id)"
+        )
         var request: URLRequest = .init(url: url)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
@@ -448,18 +440,13 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         jsonWebToken: String,
         name: String
     ) throws -> [ProfileResponseData] {
-        var urlComponents: URLComponents = .init()
-        urlComponents.scheme = Constants.httpsScheme
-        urlComponents.host = Constants.itcHost
-        urlComponents.path = "/v1/profiles"
-        urlComponents.queryItems = [
-            .init(name: "filter[name]", value: name),
-            .init(name: "include", value: "devices")
-        ]
-        guard let url: URL = urlComponents.url
-        else {
-            throw Error.unableToCreateURL(urlComponents: urlComponents)
-        }
+        let url: URL = try createRequestURL(
+            path: "/v1/profiles",
+            queryItems: [
+                .init(name: "filter[name]", value: name),
+                .init(name: "include", value: "devices")
+            ]
+        )
         var request: URLRequest = .init(url: url)
         request.setValue("Bearer \(jsonWebToken)", forHTTPHeaderField: "Authorization")
         request.setValue(Constants.applicationJSONHeaderValue, forHTTPHeaderField: "Accept")
@@ -475,6 +462,25 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         } catch let decodingError as DecodingError {
             throw Error.unableToDecodeResponse(responseData: data, decodingError: decodingError)
         }
+    }
+
+    private func createRequestURL(
+        path: String,
+        queryItems: [URLQueryItem] = []
+    ) throws -> URL {
+        let host: String = enterprise ? Constants.enterpriseHost : Constants.itcHost
+        var urlComponents: URLComponents = .init()
+        urlComponents.scheme = Constants.httpsScheme
+        urlComponents.host = host
+        urlComponents.path = path
+        if !queryItems.isEmpty {
+            urlComponents.queryItems = queryItems
+        }
+        guard let url: URL = urlComponents.url
+        else {
+            throw Error.unableToCreateURL(urlComponents: urlComponents)
+        }
+        return url
     }
 
     private func createITCApiJSONDecoder() -> JSONDecoder {
