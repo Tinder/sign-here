@@ -169,7 +169,8 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "bundleIdentifierName": "bundleIdentifierName",
             "platform": "platform",
             "profileName": "profileName",
-            "autoRegenerate": false
+            "autoRegenerate": false,
+            "enterprise": true
         }
         """.utf8)
 
@@ -191,6 +192,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.platform, "platform")
         XCTAssertEqual(subject.profileName, "profileName")
         XCTAssertEqual(subject.autoRegenerate, false)
+        XCTAssertEqual(subject.enterprise, true)
     }
 
     func test_execute_alreadyActiveCertificate() throws {

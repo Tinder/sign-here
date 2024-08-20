@@ -73,7 +73,7 @@ final class CreateKeychainCommandTests: XCTestCase {
             ).description,
             as: .lines
         )
-        
+
         assertSnapshot(
             matching: CreateKeychainCommand.Error.unableToListKeychains(
                 output: .init(status: 0, data: .init("output".utf8), errorData: .init("errorOutput".utf8))
