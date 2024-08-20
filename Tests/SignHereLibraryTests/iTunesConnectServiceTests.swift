@@ -157,7 +157,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             as: .dump
         )
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -212,7 +212,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             as: .dump
         )
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -262,7 +262,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             as: .dump
         )
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -315,7 +315,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             as: .dump
         )
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -359,7 +359,7 @@ final class iTunesConnectServiceTests: XCTestCase {
             as: .dump
         )
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         XCTAssertTrue(value.isEmpty)
     }
@@ -389,7 +389,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -426,7 +426,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -450,7 +450,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         XCTAssertEqual(value, "bundleIDITCId")
     }
@@ -475,7 +475,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         XCTAssertEqual(value, "bundleIDITCId")
     }
@@ -507,7 +507,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -537,7 +537,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -558,7 +558,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         XCTAssertEqual(value.sorted(), ["deviceITCId"])
     }
@@ -584,7 +584,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -606,7 +606,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         XCTAssertEqual(value.sorted(), ["deviceITCId"])
     }
@@ -633,7 +633,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -663,7 +663,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -693,7 +693,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
         assertSnapshot(
             matching: value,
@@ -727,7 +727,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -745,7 +745,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeWithStatusCodeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -769,7 +769,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeWithStatusCodeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 
@@ -791,7 +791,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
 
         assertSnapshot(
@@ -822,7 +822,7 @@ final class iTunesConnectServiceTests: XCTestCase {
 
         // THEN
         for argValue in network.executeArgValues {
-            assertSnapshot(matching: argValue, as: .curl)
+            assertSnapshot(matching: argValue, as: .dump)
         }
     }
 

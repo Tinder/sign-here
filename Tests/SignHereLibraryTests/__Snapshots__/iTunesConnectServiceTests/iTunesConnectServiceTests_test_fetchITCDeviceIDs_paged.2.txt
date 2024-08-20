@@ -1,3 +1,19 @@
-curl \
-	--header "Authorization: Bearer jsonWebToken" \
-	"https://api.appstoreconnect.apple.com/nextCertURL"
+▿ https://api.appstoreconnect.apple.com/nextCertURL
+  ▿ url: Optional<URL>
+    - some: https://api.appstoreconnect.apple.com/nextCertURL
+  - cachePolicy: 0
+  - timeoutInterval: 60.0
+  - mainDocumentURL: Optional<URL>.none
+  - networkServiceType: NSURLRequestNetworkServiceType.NSURLRequestNetworkServiceType
+  - allowsCellularAccess: true
+  ▿ httpMethod: Optional<String>
+    - some: "GET"
+  ▿ allHTTPHeaderFields: Optional<Dictionary<String, String>>
+    ▿ some: 1 key/value pair
+      ▿ (2 elements)
+        - key: "Authorization"
+        - value: "Bearer jsonWebToken"
+  - httpBody: Optional<Data>.none
+  - httpBodyStream: Optional<NSInputStream>.none
+  - httpShouldHandleCookies: true
+  - httpShouldUsePipelining: false
