@@ -306,7 +306,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         let jsonWebToken: String = try jsonWebTokenService.createToken(
             keyIdentifier: keyIdentifier,
             issuerID: issuerID,
-            secretKey: try files.read(Path(itunesConnectKeyPath))
+            secretKey: try files.read(Path(itunesConnectKeyPath)),
+            enterprise: enterprise
         )
         let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(jsonWebToken: jsonWebToken)
         guard let profileName, let profile = try? fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)

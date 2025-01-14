@@ -97,7 +97,8 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
         let jsonWebToken: String = try jsonWebTokenService.createToken(
             keyIdentifier: keyIdentifier,
             issuerID: issuerID,
-            secretKey: try files.read(Path(itunesConnectKeyPath))
+            secretKey: try files.read(Path(itunesConnectKeyPath)),
+            enterprise: enterprise
         )
         try iTunesConnectService.deleteProvisioningProfile(
             jsonWebToken: jsonWebToken,

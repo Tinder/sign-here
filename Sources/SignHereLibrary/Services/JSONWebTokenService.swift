@@ -16,7 +16,8 @@ internal protocol JSONWebTokenService {
     func createToken(
         keyIdentifier: String,
         issuerID: String,
-        secretKey: Data
+        secretKey: Data,
+        enterprise: Bool
     ) throws -> String
 }
 
@@ -44,7 +45,8 @@ internal class JSONWebTokenServiceImp: JSONWebTokenService {
     func createToken(
         keyIdentifier: String,
         issuerID: String,
-        secretKey: Data
+        secretKey: Data,
+        enterprise: Bool
     ) throws -> String {
         let header: JSONWebTokenHeader = .init(
             alg: "ES256",
@@ -57,7 +59,7 @@ internal class JSONWebTokenServiceImp: JSONWebTokenService {
             iss: issuerID,
             iat: currentTime.timeIntervalSince1970,
             exp: expirationTime.timeIntervalSince1970,
-            aud: "appstoreconnect-v1"
+            aud: enterprise ? "apple-developer-enterprise-v1" : "appstoreconnect-v1"
         )
         let jsonEncoder: JSONEncoder = .init()
         var components: [String] = [
