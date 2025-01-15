@@ -26,7 +26,6 @@ swift_library(
     deps = [
         "//Sources/CoreLibrary",
         "@com_github_apple_swift_argument_parser//:ArgumentParser",
-        "@com_github_kitura_blueecc//:BlueECC",
     ],
 )
 

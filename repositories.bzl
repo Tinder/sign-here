@@ -43,34 +43,6 @@ swift_library(
         strip_prefix = "PathKit-%s" % PATHKIT_GIT_SHA,
     )
 
-    _maybe(
-        http_archive,
-        name = "com_github_kitura_blueecc",
-        url = "https://github.com/Kitura/BlueECC/archive/b0983b04bcf3a571404392e4fee461cf3f17548b.zip",
-        strip_prefix = "BlueECC-b0983b04bcf3a571404392e4fee461cf3f17548b",
-        build_file_content = """
-load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
-
-swift_library(
-    name = "BlueECC",
-    srcs = glob([
-        "Sources/CryptorECC/**/*.swift",
-    ]),
-    copts = [
-        "-suppress-warnings",
-    ],
-    features = [
-        "-swift.treat_warnings_as_errors",
-    ],
-    module_name = "CryptorECC",
-    visibility = [
-        "//visibility:public",
-    ],
-)
-        """,
-        sha256 = "c708192350913e9fa9a412bde60dcf9cc2e90b58573c4f6af1298dd27e31c642",
-    )
-
     MOCKOLO_VERSION = "519439fb550dc23e622897de0080ce8ba68ddd78"
 
     _maybe(

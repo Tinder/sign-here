@@ -7,7 +7,7 @@
 
 import CoreLibrary
 import Foundation
-import CryptorECC
+import CryptoKit
 
 // ME: Documented here https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests
 
@@ -67,7 +67,7 @@ internal class JSONWebTokenServiceImp: JSONWebTokenService {
             ".",
             urlBase64Encode(data: try jsonEncoder.encode(payload)),
         ]
-        let signature: String = try createSignedHeaderPayload(data: Data(components.joined().utf8), secretKey: secretKey)
+        let signature: String = try createSignature(data: Data(components.joined().utf8), secretKey: secretKey)
         components.append(contentsOf: [
             ".",
             signature
@@ -75,17 +75,13 @@ internal class JSONWebTokenServiceImp: JSONWebTokenService {
         return components.joined()
     }
 
-    private func createSignedHeaderPayload(data: Data, secretKey: Data) throws -> String {
+    private func createSignature(data: Data, secretKey: Data) throws -> String {
         guard let keyString = String(data: secretKey, encoding: .utf8) else {
             throw Error.unableToCreateKeyString
         }
-        let privateKey: ECPrivateKey = try .init(key: keyString)
-        guard privateKey.curve == .prime256v1
-        else {
-            throw Error.unableToCreatePrivateKey
-        }
-        let signedData: ECSignature = try data.sign(with: privateKey)
-        return urlBase64Encode(data: signedData.r + signedData.s)
+        let key = try P256.Signing.PrivateKey(pemRepresentation: keyString)
+        let signature = try key.signature(for: data)
+        return urlBase64Encode(data: signature.rawRepresentation)
     }
 
     private func urlBase64Encode(data: Data) -> String {
