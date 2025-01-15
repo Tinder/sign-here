@@ -46,7 +46,8 @@ final class JSONWebTokenServiceTests: XCTestCase {
                 YftL55PhJATjQMDh+Yyx/FCESEM+bUeBoo/4tIggtTESWxJWvIYOwVXylhBukYc1
                 Pr+l6ipm
                 -----END PRIVATE KEY-----
-                """.utf8)
+                """.utf8),
+                enterprise: false
             )
         )
     }

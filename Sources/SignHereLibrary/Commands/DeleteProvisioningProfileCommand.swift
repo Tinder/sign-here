@@ -24,6 +24,7 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
         case keyIdentifier = "keyIdentifier"
         case issuerID = "issuerID"
         case itunesConnectKeyPath = "itunesConnectKeyPath"
+        case enterprise = "enterprise"
     }
 
     @Option(help: "The iTunes Connect API ID of the provisioning profile to delete (https://developer.apple.com/documentation/appstoreconnectapi/profile)")
@@ -38,6 +39,9 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
     @Option(help: "The path to the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)")
     internal var itunesConnectKeyPath: String
 
+    @Flag(help: "Controls if the enterprise API should be used.")
+    internal var enterprise: Bool = false
+
     private let files: Files
     private let jsonWebTokenService: JSONWebTokenService
     private let iTunesConnectService: iTunesConnectService
@@ -47,10 +51,7 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
         files = filesImp
         jsonWebTokenService = JSONWebTokenServiceImp(clock: ClockImp())
         iTunesConnectService = iTunesConnectServiceImp(
-            network: NetworkImp(),
-            files: filesImp,
-            shell: ShellImp(),
-            clock: ClockImp()
+            enterprise: false
         )
     }
 
@@ -61,7 +62,8 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
         provisioningProfileId: String,
         keyIdentifier: String,
         issuerID: String,
-        itunesConnectKeyPath: String
+        itunesConnectKeyPath: String,
+        enterprise: Bool
     ) {
         self.files = files
         self.jsonWebTokenService = jsonWebTokenService
@@ -70,24 +72,24 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
         self.keyIdentifier = keyIdentifier
         self.issuerID = issuerID
         self.itunesConnectKeyPath = itunesConnectKeyPath
+        self.enterprise = enterprise
     }
 
     internal init(from decoder: Decoder) throws {
         let filesImp: Files = FilesImp()
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+        let enterprise: Bool = try container.decode(Bool.self, forKey: .enterprise)
         self.init(
             files: filesImp,
             jsonWebTokenService: JSONWebTokenServiceImp(clock: ClockImp()),
             iTunesConnectService: iTunesConnectServiceImp(
-                network: NetworkImp(),
-                files: filesImp,
-                shell: ShellImp(),
-                clock: ClockImp()
+                enterprise: enterprise
             ),
             provisioningProfileId: try container.decode(String.self, forKey: .provisioningProfileId),
             keyIdentifier: try container.decode(String.self, forKey: .keyIdentifier),
             issuerID: try container.decode(String.self, forKey: .issuerID),
-            itunesConnectKeyPath: try container.decode(String.self, forKey: .itunesConnectKeyPath)
+            itunesConnectKeyPath: try container.decode(String.self, forKey: .itunesConnectKeyPath),
+            enterprise: enterprise
         )
     }
 
@@ -95,7 +97,8 @@ internal struct DeleteProvisioningProfileCommand: ParsableCommand {
         let jsonWebToken: String = try jsonWebTokenService.createToken(
             keyIdentifier: keyIdentifier,
             issuerID: issuerID,
-            secretKey: try files.read(Path(itunesConnectKeyPath))
+            secretKey: try files.read(Path(itunesConnectKeyPath)),
+            enterprise: enterprise
         )
         try iTunesConnectService.deleteProvisioningProfile(
             jsonWebToken: jsonWebToken,

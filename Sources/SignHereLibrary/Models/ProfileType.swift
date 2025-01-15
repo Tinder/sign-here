@@ -28,7 +28,7 @@ enum ProfileType {
 
     var usesDevices: Bool {
         switch self {
-            case .appStore: return false
+            case .appStore, .inHouse: return false
             default: return true
         }
     }

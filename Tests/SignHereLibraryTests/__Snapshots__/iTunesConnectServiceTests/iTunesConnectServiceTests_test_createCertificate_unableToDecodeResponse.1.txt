@@ -1,7 +1,26 @@
-curl \
-	--request POST \
-	--header "Accept: application/json" \
-	--header "Authorization: Bearer jsonWebToken" \
-	--header "Content-Type: application/json" \
-	--data "{\"data\":{\"attributes\":{\"certificateType\":\"certificateType\",\"csrContent\":\"\"},\"type\":\"certificates\"}}" \
-	"https://api.appstoreconnect.apple.com/v1/certificates"
+▿ https://api.appstoreconnect.apple.com/v1/certificates
+  ▿ url: Optional<URL>
+    - some: https://api.appstoreconnect.apple.com/v1/certificates
+  - cachePolicy: 0
+  - timeoutInterval: 60.0
+  - mainDocumentURL: Optional<URL>.none
+  - networkServiceType: NSURLRequestNetworkServiceType.NSURLRequestNetworkServiceType
+  - allowsCellularAccess: true
+  ▿ httpMethod: Optional<String>
+    - some: "POST"
+  ▿ allHTTPHeaderFields: Optional<Dictionary<String, String>>
+    ▿ some: 3 key/value pairs
+      ▿ (2 elements)
+        - key: "Accept"
+        - value: "application/json"
+      ▿ (2 elements)
+        - key: "Authorization"
+        - value: "Bearer jsonWebToken"
+      ▿ (2 elements)
+        - key: "Content-Type"
+        - value: "application/json"
+  ▿ httpBody: Optional<Data>
+    - some: 99 bytes
+  - httpBodyStream: Optional<NSInputStream>.none
+  - httpShouldHandleCookies: true
+  - httpShouldUsePipelining: false

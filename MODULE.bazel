@@ -8,6 +8,5 @@ bazel_dep(name = "swift_argument_parser", version = "1.3.0", repo_name = "com_gi
 non_module_dependencies = use_extension("//:extensions.bzl", "non_module_dependencies")
 use_repo(
     non_module_dependencies,
-    "com_github_kitura_blueecc",
     "com_github_kylef_pathkit",
 )

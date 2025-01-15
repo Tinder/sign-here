@@ -126,6 +126,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case certificateSigningRequestSubject = "certificateSigningRequestSubject"
         case profileName = "profileName"
         case autoRegenerate = "autoRegenerate"
+        case enterprise = "enterprise"
     }
 
     @Option(help: "The key identifier of the private key (https://developer.apple.com/documentation/appstoreconnectapi/generating_tokens_for_api_requests)")
@@ -189,6 +190,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     @Flag(help: "Defines if the profile should be regenerated in case it already exists (optional)")
     internal var autoRegenerate = false
 
+    @Flag(help: "Controls if the enterprise API should be used.")
+    internal var enterprise: Bool = false
+
     private let files: Files
     private let log: Log
     private let shell: Shell
@@ -206,10 +210,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         shell = shellImp
         uuid = UUIDImp()
         iTunesConnectService = iTunesConnectServiceImp(
-            network: NetworkImp(),
-            files: filesImp,
-            shell: shellImp,
-            clock: clockImp
+            enterprise: false
         )
     }
 
@@ -236,7 +237,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         bundleIdentifierName: String?,
         platform: String,
         profileName: String?,
-        autoRegenerate: Bool
+        autoRegenerate: Bool,
+        enterprise: Bool
     ) {
         self.files = files
         self.log = log
@@ -261,6 +263,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.platform = platform
         self.profileName = profileName
         self.autoRegenerate = autoRegenerate
+        self.enterprise = enterprise
     }
 
     internal init(from decoder: Decoder) throws {
@@ -268,6 +271,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         let clockImp: Clock = ClockImp()
         let shellImp: Shell = ShellImp()
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+        let enterprise: Bool = try container.decode(Bool.self, forKey: .enterprise)
         self.init(
             files: filesImp,
             log: LogImp(),
@@ -275,10 +279,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             shell: shellImp,
             uuid: UUIDImp(),
             iTunesConnectService: iTunesConnectServiceImp(
-                network: NetworkImp(),
-                files: filesImp,
-                shell: shellImp,
-                clock: clockImp
+                enterprise: enterprise
             ),
             keyIdentifier: try container.decode(String.self, forKey: .keyIdentifier),
             issuerID: try container.decode(String.self, forKey: .issuerID),
@@ -296,7 +297,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             bundleIdentifierName: try container.decodeIfPresent(String.self, forKey: .bundleIdentifierName),
             platform: try container.decode(String.self, forKey: .platform),
             profileName: try container.decodeIfPresent(String.self, forKey: .profileName),
-            autoRegenerate: try container.decode(Bool.self, forKey: .autoRegenerate)
+            autoRegenerate: try container.decode(Bool.self, forKey: .autoRegenerate),
+            enterprise: enterprise
         )
     }
 
@@ -304,7 +306,8 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         let jsonWebToken: String = try jsonWebTokenService.createToken(
             keyIdentifier: keyIdentifier,
             issuerID: issuerID,
-            secretKey: try files.read(Path(itunesConnectKeyPath))
+            secretKey: try files.read(Path(itunesConnectKeyPath)),
+            enterprise: enterprise
         )
         let deviceIDs: Set<String> = try iTunesConnectService.fetchITCDeviceIDs(jsonWebToken: jsonWebToken)
         guard let profileName, let profile = try? fetchProvisioningProfile(jsonWebToken: jsonWebToken, name: profileName)

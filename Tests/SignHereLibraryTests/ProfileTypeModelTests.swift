@@ -90,7 +90,7 @@ final class ProfileTypeModelTests: XCTestCase {
         // THEN
         profileTypes.forEach { profileType in
             XCTAssertEqual(profileType, .inHouse)
-            XCTAssertEqual(profileType.usesDevices, true)
+            XCTAssertEqual(profileType.usesDevices, false)
         }
     }
 
