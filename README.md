@@ -8,11 +8,6 @@ allows users to automate the creation of certificates and provisioning profiles 
 * Bazel (Tested with Bazel 6.0)
 * OpenSSL (tested with LibreSSL 3.3.6)
 
-## Limitations
-
-sign-here cannot be used to generate certificates for Enterprise based accounts. This is a [known limitation
-of the iTunes Connect API](https://developer.apple.com/forums/thread/117282).
-
 ## Getting Started
 
 To start using `sign-here` immediately, simply clone down the repo and run the tool:
@@ -159,6 +154,7 @@ OPTIONS:
   --auto-regenerate
                           Defines if the profile should be regenerated in case
                           it already exists (optional)
+  --enterprise            Controls if the enterprise API should be used.
   -h, --help              Show help information.
 
 
