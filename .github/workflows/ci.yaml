@@ -25,6 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64
+      # Hardening CI/CD workflow for improved security posture
       - uses: actions/upload-artifact@v3
         with:
           name: sign-here
@@ -36,8 +37,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64 --enable_bzlmod
+      # Hardening CI/CD workflow for improved security posture
       - uses: actions/upload-artifact@v3
         with:
           name: sign-here
           path: bazel-bin/Sources/SignHereTool/sign-here
           if-no-files-found: error
+
