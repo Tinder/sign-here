@@ -38,6 +38,6 @@ jobs:
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64 --enable_bzlmod
       - uses: actions/upload-artifact@v4
         with:
-          name: sign-here
+          name: sign-here_bzlmod
           path: bazel-bin/Sources/SignHereTool/sign-here
           if-no-files-found: error
