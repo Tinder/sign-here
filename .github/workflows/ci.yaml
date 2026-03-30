@@ -2,26 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   tests:
     name: Run tests
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk test //Tests/... --xcode_version=14.3
   tests-bzlmod:
     name: Run tests w/bzlmod
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk test //Tests/... --xcode_version=14.3 --enable_bzlmod
   executable:
     name: Build macos_command_line_application
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64
@@ -32,7 +32,7 @@ jobs:
           if-no-files-found: error
   executable-bzlmod:
     name: Build macos_command_line_application w/bzlmod
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - run: bazelisk build //Sources/SignHereTool:sign-here -c opt --macos_cpus=x86_64,arm64 --enable_bzlmod
