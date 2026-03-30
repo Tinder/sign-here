@@ -27,6 +27,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
     override func setUp() {
         super.setUp()
         files = .init()
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
         log = .init()
         jsonWebTokenService = .init()
         shell = .init()
@@ -370,6 +373,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             XCTAssert(false, "Shouldn't be executed")
             return self.createCreateProfileResponse()
         }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
             return [responseObject]
         }
@@ -479,6 +485,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             XCTAssert(false, "Shouldn't be executed")
             return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
         }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
             return [responseObject]
