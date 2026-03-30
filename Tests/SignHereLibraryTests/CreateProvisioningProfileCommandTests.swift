@@ -229,6 +229,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         files.readPathHandler = { _ in
             fileDataReads.removeFirst()
         }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
         iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
             self.createDownloadCertificateResponse().data
         }
@@ -257,11 +260,20 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
 
     func test_execute_certificateUUIDNotFound() throws {
         // GIVEN
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
         var fileDataReads: [Data] = [
             Data("iTunesConnectAPIKey".utf8)
         ]
         files.readPathHandler = { _ in
             fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
         }
         iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
             self.createDownloadCertificateResponse().data
@@ -298,6 +310,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         )
 
         XCTAssertEqual(fileDataReads.count, 0)
+        XCTAssertEqual(executeLaunchPaths.count, 0)
     }
 
     func test_execute_noActiveCertificates() throws {
@@ -321,6 +334,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         ]
         files.readPathHandler = { _ in
             fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
         }
         iTunesConnectService.createCertificateHandler = { _, _, _ in
             self.createCreateCertificateResponse()
