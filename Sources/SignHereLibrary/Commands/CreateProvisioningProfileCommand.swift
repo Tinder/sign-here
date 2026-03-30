@@ -28,6 +28,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case unableToCreatePrivateKeyAndCSR(output: ShellOutput)
         case unableToCreateP12Identity(output: ShellOutput)
         case unableToBase64DecodeCertificate(displayName: String)
+        case certificateUUIDNotFound(certificateUUID: String)
         case unableToCreatePEM(output: ShellOutput)
         case unableToBase64DecodeProfile(name: String)
         case unableToUpdateKeychainPartitionList(keychainName: String, output: ShellOutput)
@@ -58,6 +59,11 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
                     return """
                     [CreateProvisioningProfileCommand] Unable to base 64 decode certificate
                     - Certificate display name: \(displayName)
+                    """
+                case let .certificateUUIDNotFound(certificateUUID: certificateUUID):
+                    return """
+                    [CreateProvisioningProfileCommand] Unable to find certificate
+                    - Certificate UUID: \(certificateUUID)
                     """
                 case let .unableToCreatePEM(output: output):
                     return """
@@ -120,6 +126,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case platform = "platform"
         case profileType = "profileType"
         case certificateType = "certificateType"
+        case certificateUUID = "certificateUUID"
         case outputPath = "outputPath"
         case opensslPath = "opensslPath"
         case intermediaryAppleCertificates = "intermediaryAppleCertificates"
@@ -161,6 +168,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
 
     @Option(help: "The certificate type which you wish to create (https://developer.apple.com/documentation/appstoreconnectapi/certificatetype)")
     internal var certificateType: String
+
+    @Option(help: "The App Store Connect certificate UUID to use when creating the provisioning profile (optional)")
+    internal var certificateUUID: String?
 
     @Option(help: "Where to save the created provisioning profile")
     internal var outputPath: String
@@ -230,6 +240,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         bundleIdentifier: String,
         profileType: String,
         certificateType: String,
+        certificateUUID: String?,
         outputPath: String,
         opensslPath: String,
         intermediaryAppleCertificates: [String],
@@ -255,6 +266,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.bundleIdentifier = bundleIdentifier
         self.profileType = profileType
         self.certificateType = certificateType
+        self.certificateUUID = certificateUUID
         self.outputPath = outputPath
         self.opensslPath = opensslPath
         self.intermediaryAppleCertificates = intermediaryAppleCertificates
@@ -290,6 +302,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             bundleIdentifier: try container.decode(String.self, forKey: .bundleIdentifier),
             profileType: try container.decode(String.self, forKey: .profileType),
             certificateType: try container.decode(String.self, forKey: .certificateType),
+            certificateUUID: try container.decodeIfPresent(String.self, forKey: .certificateUUID),
             outputPath: try container.decode(String.self, forKey: .outputPath),
             opensslPath: try container.decode(String.self, forKey: .opensslPath),
             intermediaryAppleCertificates: try container.decodeIfPresent([String].self, forKey: .intermediaryAppleCertificates) ?? [],
@@ -383,12 +396,23 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     ) throws -> (cer: Path, certificateId: String) {
         let cer: Path
         let certificateId: String
-        if let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData = try iTunesConnectService.fetchActiveCertificates(
+        let fetchedActiveCertificates: [DownloadCertificateResponse.DownloadCertificateResponseData] = try iTunesConnectService.fetchActiveCertificates(
             jsonWebToken: jsonWebToken,
             opensslPath: opensslPath,
             privateKeyPath: privateKeyPath,
             certificateType: certificateType
-        ).first {
+        )
+        let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData?
+        if let certificateUUID: String = certificateUUID {
+            guard let matchingCertificate: DownloadCertificateResponse.DownloadCertificateResponseData = fetchedActiveCertificates.first(where: { $0.id == certificateUUID })
+            else {
+                throw Error.certificateUUIDNotFound(certificateUUID: certificateUUID)
+            }
+            fetchedActiveCertificate = matchingCertificate
+        } else {
+            fetchedActiveCertificate = fetchedActiveCertificates.first
+        }
+        if let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData = fetchedActiveCertificate {
             guard let data: Data = .init(base64Encoded: fetchedActiveCertificate.attributes.certificateContent)
             else {
                 throw Error.unableToBase64DecodeCertificate(displayName: fetchedActiveCertificate.attributes.displayName)
