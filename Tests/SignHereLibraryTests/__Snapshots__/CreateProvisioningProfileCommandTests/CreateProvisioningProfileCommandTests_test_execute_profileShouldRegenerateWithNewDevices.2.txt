@@ -1,9 +1,12 @@
-▿ 3 elements
+▿ 4 elements
   ▿ (2 elements)
     - .0: "The profile will be regenerated because it is missing the device(s): deviceID"
     - .1: "\n"
   ▿ (2 elements)
     - .0: "Deleted profile with id: createdProfileITCID"
+    - .1: "\n"
+  ▿ (2 elements)
+    - .0: "Fetched certificate - ID: activeCertID, Display Name: activeCertDisplayName, Type: certificateType, Expiration Date: 1970-01-01 00:01:40 +0000"
     - .1: "\n"
   ▿ (2 elements)
     - .0: "createdProfileITCID"

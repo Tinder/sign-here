@@ -402,6 +402,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             privateKeyPath: privateKeyPath,
             certificateType: certificateType
         )
+        for certificate in fetchedActiveCertificates {
+            log.append("Fetched certificate - ID: \(certificate.id), Display Name: \(certificate.attributes.displayName), Type: \(certificate.attributes.certificateType), Expiration Date: \(certificate.attributes.expirationDate)")
+        }
         let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData?
         if let certificateUUID: String = certificateUUID {
             guard let matchingCertificate: DownloadCertificateResponse.DownloadCertificateResponseData = fetchedActiveCertificates.first(where: { $0.id == certificateUUID })
