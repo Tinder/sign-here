@@ -285,7 +285,16 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         }
 
         // THEN
-        assertSnapshot()
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(fileDataReads.count, 0)
     }
 
     func test_execute_noActiveCertificates() throws {
