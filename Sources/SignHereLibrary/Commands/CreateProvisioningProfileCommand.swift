@@ -128,6 +128,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case certificateType = "certificateType"
         case certificateUUID = "certificateUUID"
         case outputPath = "outputPath"
+        case certificateOutputDirectory = "certificateOutputDirectory"
         case opensslPath = "opensslPath"
         case intermediaryAppleCertificates = "intermediaryAppleCertificates"
         case certificateSigningRequestSubject = "certificateSigningRequestSubject"
@@ -174,6 +175,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
 
     @Option(help: "Where to save the created provisioning profile")
     internal var outputPath: String
+
+    @Option(help: "Directory where certificate artifacts should be saved (optional)")
+    internal var certificateOutputDirectory: String?
 
     @Option(help: "Path to the openssl executable, this is used to generate CSR signing artifacts that are required when creating certificates")
     internal var opensslPath: String
@@ -242,6 +246,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         certificateType: String,
         certificateUUID: String?,
         outputPath: String,
+        certificateOutputDirectory: String?,
         opensslPath: String,
         intermediaryAppleCertificates: [String],
         certificateSigningRequestSubject: String,
@@ -268,6 +273,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.certificateType = certificateType
         self.certificateUUID = certificateUUID
         self.outputPath = outputPath
+        self.certificateOutputDirectory = certificateOutputDirectory
         self.opensslPath = opensslPath
         self.intermediaryAppleCertificates = intermediaryAppleCertificates
         self.certificateSigningRequestSubject = certificateSigningRequestSubject
@@ -304,6 +310,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             certificateType: try container.decode(String.self, forKey: .certificateType),
             certificateUUID: try container.decodeIfPresent(String.self, forKey: .certificateUUID),
             outputPath: try container.decode(String.self, forKey: .outputPath),
+            certificateOutputDirectory: try container.decodeIfPresent(String.self, forKey: .certificateOutputDirectory),
             opensslPath: try container.decode(String.self, forKey: .opensslPath),
             intermediaryAppleCertificates: try container.decodeIfPresent([String].self, forKey: .intermediaryAppleCertificates) ?? [],
             certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject),
@@ -396,14 +403,19 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     ) throws -> (cer: Path, certificateId: String) {
         let cer: Path
         let certificateId: String
+        let certificateData: Data
+        let certificateSource: CertificateSource
         let fetchedActiveCertificates: [DownloadCertificateResponse.DownloadCertificateResponseData] = try iTunesConnectService.fetchActiveCertificates(
             jsonWebToken: jsonWebToken,
             opensslPath: opensslPath,
             privateKeyPath: privateKeyPath,
             certificateType: certificateType
         )
-        for certificate in fetchedActiveCertificates {
-            log.append("Fetched certificate - ID: \(certificate.id), Display Name: \(certificate.attributes.displayName), Type: \(certificate.attributes.certificateType), Expiration Date: \(certificate.attributes.expirationDate)")
+        let fetchedActiveCertificateDescriptions: [String] = fetchedActiveCertificates.map {
+            "Fetched certificate - ID: \($0.id), Display Name: \($0.attributes.displayName), Type: \($0.attributes.certificateType), Expiration Date: \($0.attributes.expirationDate)"
+        }
+        for fetchedActiveCertificateDescription in fetchedActiveCertificateDescriptions {
+            log.append(fetchedActiveCertificateDescription)
         }
         let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData?
         if let certificateUUID: String = certificateUUID {
@@ -422,7 +434,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             }
             cer = try files.uniqueTemporaryPath() + "\(fetchedActiveCertificate.id).cer"
             try files.write(data, to: cer)
+            certificateData = data
             certificateId = fetchedActiveCertificate.id
+            certificateSource = .fetched
         } else {
             let createCertificateResponse: CreateCertificateResponse = try iTunesConnectService.createCertificate(
                 jsonWebToken: jsonWebToken,
@@ -435,7 +449,18 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             }
             cer = try files.uniqueTemporaryPath() + "\(createCertificateResponse.data.id).cer"
             try files.write(cerData, to: cer)
+            certificateData = cerData
             certificateId = createCertificateResponse.data.id
+            certificateSource = .created
+        }
+        if let certificateOutputDirectory: String = certificateOutputDirectory {
+            try saveCertificateArtifacts(
+                certificateOutputDirectory: .init(certificateOutputDirectory),
+                selectedCertificateId: certificateId,
+                certificateSource: certificateSource,
+                fetchedActiveCertificates: fetchedActiveCertificates,
+                certificateData: certificateData
+            )
         }
         return (cer: cer, certificateId: certificateId)
     }
@@ -570,6 +595,37 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             throw Error.unableToBase64DecodeProfile(name: profile.attributes.name)
         }
         try files.write(profileData, to: .init(outputPath))
+    }
+
+    private func saveCertificateArtifacts(
+        certificateOutputDirectory: Path,
+        selectedCertificateId: String,
+        certificateSource: CertificateSource,
+        fetchedActiveCertificates: [DownloadCertificateResponse.DownloadCertificateResponseData],
+        certificateData: Data
+    ) throws {
+        let certificateOutput: CertificateOutput = .init(
+            selectedCertificateId: selectedCertificateId,
+            certificateSource: certificateSource,
+            certificates: fetchedActiveCertificates.map {
+                .init(
+                    id: $0.id,
+                    displayName: $0.attributes.displayName,
+                    certificateType: $0.attributes.certificateType,
+                    expirationDate: $0.attributes.expirationDate
+                )
+            }
+        )
+        let jsonEncoder: JSONEncoder = .init()
+        jsonEncoder.outputFormatting = [
+            .prettyPrinted,
+            .sortedKeys,
+        ]
+        jsonEncoder.dateEncodingStrategy = .iso8601
+        let certificateOutputData: Data = try jsonEncoder.encode(certificateOutput)
+        try files.createDirectory(certificateOutputDirectory)
+        try files.write(certificateOutputData, to: certificateOutputDirectory + "certificates.json")
+        try files.write(certificateData, to: certificateOutputDirectory + "\(selectedCertificateId).cer")
     }
 
     private func shouldRegenerate(profile: ProfileResponseData, with deviceIDs: Set<String>) -> Bool {

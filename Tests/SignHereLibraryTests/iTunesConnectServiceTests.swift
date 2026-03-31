@@ -115,6 +115,23 @@ final class iTunesConnectServiceTests: XCTestCase {
             ).description,
             as: .lines
         )
+        assertSnapshot(
+            matching: iTunesConnectServiceImp.Error.unableToDecodeResponse(
+                responseData: Data("""
+                {
+                  "errors" : [ {
+                    "id" : "4c00029f-e45b-434d-9c8b-f5c46f92c1a4",
+                    "status" : "409",
+                    "code" : "ENTITY_ERROR",
+                    "title" : "There is a problem with the request entity",
+                    "detail" : "You already have a current iOS Distribution certificate or a pending certificate request."
+                  } ]
+                }
+                """.utf8),
+                decodingError: .dataCorrupted(.init(codingPath: [], debugDescription: "debugDescription", underlyingError: nil))
+            ).description,
+            as: .lines
+        )
     }
 
     func test_fetchActiveCertificates_privateKeyMatches() throws {

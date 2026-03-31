@@ -50,6 +50,18 @@ internal protocol iTunesConnectService {
 
 internal class iTunesConnectServiceImp: iTunesConnectService {
     enum Error: Swift.Error, CustomStringConvertible {
+        private struct ITCApiErrorResponse: Decodable {
+            struct ITCApiError: Decodable {
+                var id: String
+                var status: String
+                var code: String
+                var title: String
+                var detail: String
+            }
+
+            var errors: [ITCApiError]
+        }
+
         case invalidURL(string: String)
         case unableToCreateURL(urlComponents: URLComponents)
         case unableToDetermineITCIdForBundleId(bundleIdentifier: String, platform: String)
@@ -73,6 +85,26 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                 @unknown default:
                     return String(describing: decodingError)
             }
+        }
+        private static func appStoreConnectErrorDescription(
+            responseData: Data
+        ) -> String? {
+            guard let response: ITCApiErrorResponse = try? JSONDecoder().decode(
+                ITCApiErrorResponse.self,
+                from: responseData
+            ),
+            let error: ITCApiErrorResponse.ITCApiError = response.errors.first
+            else {
+                return nil
+            }
+            return """
+            [iTunesConnectServiceImp] App Store Connect request failed
+            - Error ID: \(error.id)
+            - Status: \(error.status)
+            - Code: \(error.code)
+            - Title: \(error.title)
+            - Detail: \(error.detail)
+            """
         }
 
         var description: String {
@@ -117,6 +149,9 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                     - Response: \(String(data: responseData, encoding: .utf8) ?? "unknown")
                     """
                 case let .unableToDecodeResponse(responseData: responseData, decodingError: decodingError):
+                    if let appStoreConnectErrorDescription: String = Self.appStoreConnectErrorDescription(responseData: responseData) {
+                        return appStoreConnectErrorDescription
+                    }
                     return """
                     [iTunesConnectServiceImp] Unable to decode response
                     - Decoding Error: \(Self.decodingErrorDescription(decodingError: decodingError))
