@@ -56,7 +56,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             certificateType: "certificateType",
             certificateUUID: nil,
             outputPath: "/outputPath",
-            certificateInfoOutputPath: nil,
+            certificateOutputDirectory: nil,
             opensslPath: "/opensslPath",
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
@@ -176,7 +176,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "certificateType": "certificateType",
             "certificateUUID": "certificateUUID",
             "outputPath": "/outputPath",
-            "certificateInfoOutputPath": "/certificateInfoOutputPath",
+            "certificateOutputDirectory": "/certificateOutputDirectory",
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
             "bundleIdentifierName": "bundleIdentifierName",
@@ -202,7 +202,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.certificateType, "certificateType")
         XCTAssertEqual(subject.certificateUUID, "certificateUUID")
         XCTAssertEqual(subject.outputPath, "/outputPath")
-        XCTAssertEqual(subject.certificateInfoOutputPath, "/certificateInfoOutputPath")
+        XCTAssertEqual(subject.certificateOutputDirectory, "/certificateOutputDirectory")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
         XCTAssertEqual(subject.profileName, "profileName")
@@ -261,7 +261,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(fileDataReads.count, 0)
     }
 
-    func test_execute_savesFetchedCertificateInformationWhenPathIsProvided() throws {
+    func test_execute_savesCertificateArtifactsWhenDirectoryIsProvided() throws {
         var fileDataReads: [Data] = [
             Data("iTunesConnectAPIKey".utf8)
         ]
@@ -297,17 +297,48 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             self.createCreateProfileResponse()
         }
-        subject.certificateInfoOutputPath = "/certificateInfoOutputPath"
+        subject.certificateOutputDirectory = "/certificateOutputDirectory"
 
         try subject.run()
 
-        XCTAssertEqual(
-            files.writeArgValues.map(\.0),
-            ["Fetched certificate - ID: activeCertID, Display Name: activeCertDisplayName, Type: certificateType, Expiration Date: 1970-01-01 00:01:40 +0000"]
+        let jsonDecoder: JSONDecoder = .init()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+        guard let certificatesJSONWrite = files.writeDataArgValues.first(where: { $0.1.string == "/certificateOutputDirectory/certificates.json" })
+        else {
+            XCTFail("Expected certificates.json to be written")
+            return
+        }
+        let certificateOutput: CertificateOutput = try jsonDecoder.decode(
+            CertificateOutput.self,
+            from: certificatesJSONWrite.0
         )
         XCTAssertEqual(
-            files.writeArgValues.map { $0.1.string },
-            ["/certificateInfoOutputPath"]
+            certificateOutput,
+            .init(
+                selectedCertificateId: "activeCertID",
+                certificateSource: .fetched,
+                certificates: [
+                    .init(
+                        id: "activeCertID",
+                        displayName: "activeCertDisplayName",
+                        certificateType: "certificateType",
+                        expirationDate: .init(timeIntervalSince1970: 100)
+                    )
+                ]
+            )
+        )
+        XCTAssertEqual(
+            files.createDirectoryArgValues.map(\.string),
+            ["/certificateOutputDirectory"]
+        )
+        XCTAssertEqual(
+            files.writeDataArgValues.map { $0.1.string },
+            [
+                "/unique_temporary_path_2/activeCertID.cer",
+                "/certificateOutputDirectory/certificates.json",
+                "/certificateOutputDirectory/activeCertID.cer",
+                "/outputPath"
+            ]
         )
         XCTAssertEqual(fileDataReads.count, 0)
         XCTAssertEqual(executeLaunchPaths.count, 0)

@@ -13,6 +13,7 @@ public protocol Files {
 
     func read(_ path: Path) throws -> String
     func read(_ path: Path) throws -> Data
+    func createDirectory(_ path: Path) throws
     func write(_ string: String, to path: Path) throws
     func write(_ data: Data, to path: Path) throws
     func delete(_ path: Path) throws
@@ -29,6 +30,10 @@ public final class FilesImp: Files {
 
     public func read(_ path: Path) throws -> Data {
         try path.read()
+    }
+
+    public func createDirectory(_ path: Path) throws {
+        try FileManager.default.createDirectory(atPath: path.string, withIntermediateDirectories: true, attributes: nil)
     }
 
     public func write(_ string: String, to path: Path) throws {
