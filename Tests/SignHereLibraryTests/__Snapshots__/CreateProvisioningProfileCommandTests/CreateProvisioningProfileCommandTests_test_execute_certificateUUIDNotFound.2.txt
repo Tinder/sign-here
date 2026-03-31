@@ -1,0 +1,15 @@
+▿ 1 element
+  ▿ (4 elements)
+    - .0: "/usr/bin/env"
+    ▿ .1: 9 elements
+      - "/opensslPath"
+      - "req"
+      - "-new"
+      - "-key"
+      - "privateKeyPath"
+      - "-out"
+      - "/unique_temporary_path_1/certificate_request.csr"
+      - "-subj"
+      - "certificateSigningRequestSubject"
+    - .2: Optional<Dictionary<String, String>>.none
+    - .3: Optional<Data>.none
