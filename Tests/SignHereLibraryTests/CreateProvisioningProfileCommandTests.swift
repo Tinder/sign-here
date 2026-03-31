@@ -27,6 +27,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
     override func setUp() {
         super.setUp()
         files = .init()
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
         log = .init()
         jsonWebTokenService = .init()
         shell = .init()
@@ -51,6 +54,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             bundleIdentifier: "bundleIdentifier",
             profileType: "profileType",
             certificateType: "certificateType",
+            certificateUUID: nil,
             outputPath: "/outputPath",
             opensslPath: "/opensslPath",
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
@@ -148,6 +152,12 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             matching: CreateProvisioningProfileCommand.Error.profileNameMissing.description,
             as: .lines
         )
+        assertSnapshot(
+            matching: CreateProvisioningProfileCommand.Error.certificateUUIDNotFound(
+                certificateUUID: "certificateUUID"
+            ).description,
+            as: .lines
+        )
     }
 
     func test_initDecoder() throws {
@@ -163,6 +173,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "bundleIdentifier": "bundleIdentifier",
             "profileType": "profileType",
             "certificateType": "certificateType",
+            "certificateUUID": "certificateUUID",
             "outputPath": "/outputPath",
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
@@ -187,6 +198,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.bundleIdentifier, "bundleIdentifier")
         XCTAssertEqual(subject.profileType, "profileType")
         XCTAssertEqual(subject.certificateType, "certificateType")
+        XCTAssertEqual(subject.certificateUUID, "certificateUUID")
         XCTAssertEqual(subject.outputPath, "/outputPath")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
@@ -217,6 +229,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         files.readPathHandler = { _ in
             fileDataReads.removeFirst()
         }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
         iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
             self.createDownloadCertificateResponse().data
         }
@@ -243,6 +258,61 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(fileDataReads.count, 0)
     }
 
+    func test_execute_certificateUUIDNotFound() throws {
+        // GIVEN
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            XCTFail("Shouldn't be executed")
+            return self.createCreateCertificateResponse()
+        }
+
+        subject.certificateUUID = "missingCertificateUUID"
+
+        // WHEN
+        XCTAssertThrowsError(
+            try subject.run()
+        ) {
+            if case CreateProvisioningProfileCommand.Error.certificateUUIDNotFound = $0 {
+                assertSnapshot(
+                    matching: $0.localizedDescription, 
+                    as: .lines
+                )
+            } else {
+                XCTFail("Unexpected error: \($0)")
+            }
+        }
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(fileDataReads.count, 0)
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+    }
+
     func test_execute_noActiveCertificates() throws {
         // GIVEN
         files.uniqueTemporaryPathHandler = {
@@ -264,6 +334,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         ]
         files.readPathHandler = { _ in
             fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
         }
         iTunesConnectService.createCertificateHandler = { _, _, _ in
             self.createCreateCertificateResponse()
@@ -315,6 +388,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             XCTAssert(false, "Shouldn't be executed")
             return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
         }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
             return [responseObject]
@@ -425,6 +501,9 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
             XCTAssert(false, "Shouldn't be executed")
             return self.createCreateProfileResponse()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
         }
         iTunesConnectService.fetchProvisioningProfileHandler = { _, _ in
             return [responseObject]

@@ -1,0 +1,2 @@
+[CreateProvisioningProfileCommand] Unable to find certificate
+- Certificate UUID: certificateUUID

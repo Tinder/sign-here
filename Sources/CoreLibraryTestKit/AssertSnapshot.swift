@@ -29,6 +29,7 @@ public func assertSnapshot<Value, Format>(
     testName: String = #function,
     line: UInt = #line
 ) {
+    let fileURL = URL(fileURLWithPath: "\(file)", isDirectory: false)
     let snapshotDirectory: String
     if let passedSnapshotDirectory: String = ProcessInfo.processInfo.environment["SNAPSHOT_DIRECTORY"] {
         // [CW] 3/14/23 - Allows command-line invocations to record snapshots.
@@ -40,16 +41,9 @@ public func assertSnapshot<Value, Format>(
             snapshotDirectory = passedSnapshotDirectory
         }
     } else {
-        do {
-            snapshotDirectory = try RunfilesPathHelper.determineRunfilesPath(
-                processInfo: ProcessInfo.processInfo
-            ).string
-        } catch {
-            fatalError(error.localizedDescription)
-        }
+        snapshotDirectory = fileURL.deletingLastPathComponent().path
     }
 
-    let fileURL = URL(fileURLWithPath: "\(file)", isDirectory: false)
     let fileName = fileURL.deletingPathExtension().lastPathComponent
 
     let snapshotDirectoryPath: Path = .init(snapshotDirectory)

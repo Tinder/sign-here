@@ -58,6 +58,22 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
         case unableToBase64DecodeCertificate(displayName: String)
         case unableToDeleteProvisioningProfile(id: String, responseData: Data)
         case unableToDecodeResponse(responseData: Data, decodingError: DecodingError)
+        private static func decodingErrorDescription(
+            decodingError: DecodingError
+        ) -> String {
+            switch decodingError {
+                case let .dataCorrupted(context):
+                    return "DecodingError.dataCorrupted: Data was corrupted. Debug description: \(context.debugDescription)"
+                case let .keyNotFound(key, context):
+                    return "DecodingError.keyNotFound: Missing key \(key.stringValue). Debug description: \(context.debugDescription)"
+                case let .typeMismatch(type, context):
+                    return "DecodingError.typeMismatch: Expected \(type). Debug description: \(context.debugDescription)"
+                case let .valueNotFound(type, context):
+                    return "DecodingError.valueNotFound: Missing value for \(type). Debug description: \(context.debugDescription)"
+                @unknown default:
+                    return String(describing: decodingError)
+            }
+        }
 
         var description: String {
             switch self {
@@ -103,7 +119,7 @@ internal class iTunesConnectServiceImp: iTunesConnectService {
                 case let .unableToDecodeResponse(responseData: responseData, decodingError: decodingError):
                     return """
                     [iTunesConnectServiceImp] Unable to decode response
-                    - Decoding Error: \(decodingError)
+                    - Decoding Error: \(Self.decodingErrorDescription(decodingError: decodingError))
                     - Response: \(String(data: responseData, encoding: .utf8) ?? "unknown")
                     """
             }
