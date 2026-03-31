@@ -8,8 +8,8 @@
 import Foundation
 
 internal struct CertificateOutput: Codable, Equatable {
-    let selectedCertificateId: String
-    let certificateSource: CertificateSource
+    let selectedCertificateId: String?
+    let certificateSource: CertificateSource?
     let certificates: [Certificate]
 
     struct Certificate: Codable, Equatable {

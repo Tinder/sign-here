@@ -303,7 +303,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
 
         let jsonDecoder: JSONDecoder = .init()
         jsonDecoder.dateDecodingStrategy = .iso8601
-        guard let certificatesJSONWrite = files.writeDataArgValues.first(where: { $0.1.string == "/certificateOutputDirectory/certificates.json" })
+        guard let certificatesJSONWrite = files.writeDataArgValues.last(where: { $0.1.string == "/certificateOutputDirectory/certificates.json" })
         else {
             XCTFail("Expected certificates.json to be written")
             return
@@ -334,11 +334,80 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(
             files.writeDataArgValues.map { $0.1.string },
             [
-                "/unique_temporary_path_2/activeCertID.cer",
+                "/certificateOutputDirectory/certificates.json",
                 "/certificateOutputDirectory/certificates.json",
                 "/certificateOutputDirectory/activeCertID.cer",
+                "/unique_temporary_path_2/activeCertID.cer",
                 "/outputPath"
             ]
+        )
+        XCTAssertEqual(fileDataReads.count, 0)
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+    }
+
+    func test_execute_createCertificateFailure_savesCertificateJSONBeforeThrow() throws {
+        enum TestError: Error {
+            case createCertificateFailed
+        }
+
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            []
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            throw TestError.createCertificateFailed
+        }
+        subject.certificateOutputDirectory = "/certificateOutputDirectory"
+
+        XCTAssertThrowsError(
+            try subject.run()
+        ) {
+            guard case TestError.createCertificateFailed = $0 else {
+                XCTFail("Unexpected error: \($0)")
+                return
+            }
+        }
+
+        let jsonDecoder: JSONDecoder = .init()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+        guard let certificatesJSONWrite = files.writeDataArgValues.first(where: { $0.1.string == "/certificateOutputDirectory/certificates.json" })
+        else {
+            XCTFail("Expected certificates.json to be written")
+            return
+        }
+        let certificateOutput: CertificateOutput = try jsonDecoder.decode(
+            CertificateOutput.self,
+            from: certificatesJSONWrite.0
+        )
+        XCTAssertEqual(
+            certificateOutput,
+            .init(
+                selectedCertificateId: nil,
+                certificateSource: nil,
+                certificates: []
+            )
+        )
+        XCTAssertEqual(
+            files.createDirectoryArgValues.map(\.string),
+            ["/certificateOutputDirectory"]
+        )
+        XCTAssertEqual(
+            files.writeDataArgValues.map { $0.1.string },
+            ["/certificateOutputDirectory/certificates.json"]
         )
         XCTAssertEqual(fileDataReads.count, 0)
         XCTAssertEqual(executeLaunchPaths.count, 0)

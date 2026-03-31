@@ -403,8 +403,6 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
     ) throws -> (cer: Path, certificateId: String) {
         let cer: Path
         let certificateId: String
-        let certificateData: Data
-        let certificateSource: CertificateSource
         let fetchedActiveCertificates: [DownloadCertificateResponse.DownloadCertificateResponseData] = try iTunesConnectService.fetchActiveCertificates(
             jsonWebToken: jsonWebToken,
             opensslPath: opensslPath,
@@ -416,6 +414,20 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         }
         for fetchedActiveCertificateDescription in fetchedActiveCertificateDescriptions {
             log.append(fetchedActiveCertificateDescription)
+        }
+        let certificateOutputDirectoryPath: Path?
+        if let certificateOutputDirectory: String = certificateOutputDirectory {
+            let certificateOutputDirectoryPathValue: Path = .init(certificateOutputDirectory)
+            try files.createDirectory(certificateOutputDirectoryPathValue)
+            try saveCertificateOutput(
+                certificateOutputDirectory: certificateOutputDirectoryPathValue,
+                selectedCertificateId: nil,
+                certificateSource: nil,
+                fetchedActiveCertificates: fetchedActiveCertificates
+            )
+            certificateOutputDirectoryPath = certificateOutputDirectoryPathValue
+        } else {
+            certificateOutputDirectoryPath = nil
         }
         let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData?
         if let certificateUUID: String = certificateUUID {
@@ -432,11 +444,22 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             else {
                 throw Error.unableToBase64DecodeCertificate(displayName: fetchedActiveCertificate.attributes.displayName)
             }
+            if let certificateOutputDirectoryPath: Path = certificateOutputDirectoryPath {
+                try saveCertificateOutput(
+                    certificateOutputDirectory: certificateOutputDirectoryPath,
+                    selectedCertificateId: fetchedActiveCertificate.id,
+                    certificateSource: .fetched,
+                    fetchedActiveCertificates: fetchedActiveCertificates
+                )
+                try saveCertificateData(
+                    certificateOutputDirectory: certificateOutputDirectoryPath,
+                    selectedCertificateId: fetchedActiveCertificate.id,
+                    certificateData: data
+                )
+            }
             cer = try files.uniqueTemporaryPath() + "\(fetchedActiveCertificate.id).cer"
             try files.write(data, to: cer)
-            certificateData = data
             certificateId = fetchedActiveCertificate.id
-            certificateSource = .fetched
         } else {
             let createCertificateResponse: CreateCertificateResponse = try iTunesConnectService.createCertificate(
                 jsonWebToken: jsonWebToken,
@@ -447,20 +470,22 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             else {
                 throw Error.unableToBase64DecodeCertificate(displayName: createCertificateResponse.data.attributes.displayName)
             }
+            if let certificateOutputDirectoryPath: Path = certificateOutputDirectoryPath {
+                try saveCertificateOutput(
+                    certificateOutputDirectory: certificateOutputDirectoryPath,
+                    selectedCertificateId: createCertificateResponse.data.id,
+                    certificateSource: .created,
+                    fetchedActiveCertificates: fetchedActiveCertificates
+                )
+                try saveCertificateData(
+                    certificateOutputDirectory: certificateOutputDirectoryPath,
+                    selectedCertificateId: createCertificateResponse.data.id,
+                    certificateData: cerData
+                )
+            }
             cer = try files.uniqueTemporaryPath() + "\(createCertificateResponse.data.id).cer"
             try files.write(cerData, to: cer)
-            certificateData = cerData
             certificateId = createCertificateResponse.data.id
-            certificateSource = .created
-        }
-        if let certificateOutputDirectory: String = certificateOutputDirectory {
-            try saveCertificateArtifacts(
-                certificateOutputDirectory: .init(certificateOutputDirectory),
-                selectedCertificateId: certificateId,
-                certificateSource: certificateSource,
-                fetchedActiveCertificates: fetchedActiveCertificates,
-                certificateData: certificateData
-            )
         }
         return (cer: cer, certificateId: certificateId)
     }
@@ -597,12 +622,11 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         try files.write(profileData, to: .init(outputPath))
     }
 
-    private func saveCertificateArtifacts(
+    private func saveCertificateOutput(
         certificateOutputDirectory: Path,
-        selectedCertificateId: String,
-        certificateSource: CertificateSource,
-        fetchedActiveCertificates: [DownloadCertificateResponse.DownloadCertificateResponseData],
-        certificateData: Data
+        selectedCertificateId: String?,
+        certificateSource: CertificateSource?,
+        fetchedActiveCertificates: [DownloadCertificateResponse.DownloadCertificateResponseData]
     ) throws {
         let certificateOutput: CertificateOutput = .init(
             selectedCertificateId: selectedCertificateId,
@@ -623,8 +647,14 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         ]
         jsonEncoder.dateEncodingStrategy = .iso8601
         let certificateOutputData: Data = try jsonEncoder.encode(certificateOutput)
-        try files.createDirectory(certificateOutputDirectory)
         try files.write(certificateOutputData, to: certificateOutputDirectory + "certificates.json")
+    }
+
+    private func saveCertificateData(
+        certificateOutputDirectory: Path,
+        selectedCertificateId: String,
+        certificateData: Data
+    ) throws {
         try files.write(certificateData, to: certificateOutputDirectory + "\(selectedCertificateId).cer")
     }
 
