@@ -56,6 +56,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             certificateType: "certificateType",
             certificateUUID: nil,
             outputPath: "/outputPath",
+            certificateInfoOutputPath: nil,
             opensslPath: "/opensslPath",
             intermediaryAppleCertificates: ["/intermediaryAppleCertificate"],
             certificateSigningRequestSubject: "certificateSigningRequestSubject",
@@ -175,6 +176,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
             "certificateType": "certificateType",
             "certificateUUID": "certificateUUID",
             "outputPath": "/outputPath",
+            "certificateInfoOutputPath": "/certificateInfoOutputPath",
             "opensslPath": "/opensslPath",
             "certificateSigningRequestSubject": "certificateSigningRequestSubject",
             "bundleIdentifierName": "bundleIdentifierName",
@@ -200,6 +202,7 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(subject.certificateType, "certificateType")
         XCTAssertEqual(subject.certificateUUID, "certificateUUID")
         XCTAssertEqual(subject.outputPath, "/outputPath")
+        XCTAssertEqual(subject.certificateInfoOutputPath, "/certificateInfoOutputPath")
         XCTAssertEqual(subject.bundleIdentifierName, "bundleIdentifierName")
         XCTAssertEqual(subject.platform, "platform")
         XCTAssertEqual(subject.profileName, "profileName")
@@ -256,6 +259,58 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
 
         XCTAssertEqual(executeLaunchPaths.count, 0)
         XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_savesFetchedCertificateInformationWhenPathIsProvided() throws {
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        jsonWebTokenService.createTokenHandler = { _, _, _, _ in
+            "jsonWebToken"
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importP12IdentityIntoKeychain".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importIntermediateAppleCertificate".utf8), errorData: .init()),
+            .init(status: 0, data: .init("updateKeychainPartitionList".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.determineBundleIdITCIdHandler = { _, _, _, _ in
+            "bundleId"
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            self.createCreateProfileResponse()
+        }
+        subject.certificateInfoOutputPath = "/certificateInfoOutputPath"
+
+        try subject.run()
+
+        XCTAssertEqual(
+            files.writeArgValues.map(\.0),
+            ["Fetched certificate - ID: activeCertID, Display Name: activeCertDisplayName, Type: certificateType, Expiration Date: 1970-01-01 00:01:40 +0000"]
+        )
+        XCTAssertEqual(
+            files.writeArgValues.map { $0.1.string },
+            ["/certificateInfoOutputPath"]
+        )
+        XCTAssertEqual(fileDataReads.count, 0)
+        XCTAssertEqual(executeLaunchPaths.count, 0)
     }
 
     func test_execute_certificateUUIDNotFound() throws {

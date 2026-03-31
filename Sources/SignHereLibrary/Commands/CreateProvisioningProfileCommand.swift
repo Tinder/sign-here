@@ -128,6 +128,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         case certificateType = "certificateType"
         case certificateUUID = "certificateUUID"
         case outputPath = "outputPath"
+        case certificateInfoOutputPath = "certificateInfoOutputPath"
         case opensslPath = "opensslPath"
         case intermediaryAppleCertificates = "intermediaryAppleCertificates"
         case certificateSigningRequestSubject = "certificateSigningRequestSubject"
@@ -174,6 +175,9 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
 
     @Option(help: "Where to save the created provisioning profile")
     internal var outputPath: String
+
+    @Option(help: "Where to save fetched certificate information (optional)")
+    internal var certificateInfoOutputPath: String?
 
     @Option(help: "Path to the openssl executable, this is used to generate CSR signing artifacts that are required when creating certificates")
     internal var opensslPath: String
@@ -242,6 +246,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         certificateType: String,
         certificateUUID: String?,
         outputPath: String,
+        certificateInfoOutputPath: String?,
         opensslPath: String,
         intermediaryAppleCertificates: [String],
         certificateSigningRequestSubject: String,
@@ -268,6 +273,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
         self.certificateType = certificateType
         self.certificateUUID = certificateUUID
         self.outputPath = outputPath
+        self.certificateInfoOutputPath = certificateInfoOutputPath
         self.opensslPath = opensslPath
         self.intermediaryAppleCertificates = intermediaryAppleCertificates
         self.certificateSigningRequestSubject = certificateSigningRequestSubject
@@ -304,6 +310,7 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             certificateType: try container.decode(String.self, forKey: .certificateType),
             certificateUUID: try container.decodeIfPresent(String.self, forKey: .certificateUUID),
             outputPath: try container.decode(String.self, forKey: .outputPath),
+            certificateInfoOutputPath: try container.decodeIfPresent(String.self, forKey: .certificateInfoOutputPath),
             opensslPath: try container.decode(String.self, forKey: .opensslPath),
             intermediaryAppleCertificates: try container.decodeIfPresent([String].self, forKey: .intermediaryAppleCertificates) ?? [],
             certificateSigningRequestSubject: try container.decode(String.self, forKey: .certificateSigningRequestSubject),
@@ -402,8 +409,14 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             privateKeyPath: privateKeyPath,
             certificateType: certificateType
         )
-        for certificate in fetchedActiveCertificates {
-            log.append("Fetched certificate - ID: \(certificate.id), Display Name: \(certificate.attributes.displayName), Type: \(certificate.attributes.certificateType), Expiration Date: \(certificate.attributes.expirationDate)")
+        let fetchedActiveCertificateDescriptions: [String] = fetchedActiveCertificates.map {
+            "Fetched certificate - ID: \($0.id), Display Name: \($0.attributes.displayName), Type: \($0.attributes.certificateType), Expiration Date: \($0.attributes.expirationDate)"
+        }
+        for fetchedActiveCertificateDescription in fetchedActiveCertificateDescriptions {
+            log.append(fetchedActiveCertificateDescription)
+        }
+        if let certificateInfoOutputPath: String = certificateInfoOutputPath {
+            try files.write(fetchedActiveCertificateDescriptions.joined(separator: "\n"), to: .init(certificateInfoOutputPath))
         }
         let fetchedActiveCertificate: DownloadCertificateResponse.DownloadCertificateResponseData?
         if let certificateUUID: String = certificateUUID {

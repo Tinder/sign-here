@@ -1,0 +1,6 @@
+[iTunesConnectServiceImp] App Store Connect request failed
+- Error ID: 4c00029f-e45b-434d-9c8b-f5c46f92c1a4
+- Status: 409
+- Code: ENTITY_ERROR
+- Title: There is a problem with the request entity
+- Detail: You already have a current iOS Distribution certificate or a pending certificate request.
