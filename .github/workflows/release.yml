@@ -71,8 +71,29 @@ jobs:
             release-files/sign-here-v*-darwin-arm64
             attestations/*.intoto.jsonl
 
-  publish-to-bcr:
+  wait-for-release:
     needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for release assets to be available
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          URL="https://github.com/Tinder/sign-here/releases/download/${TAG}/sign-here-${TAG}.tar.gz"
+          for i in $(seq 1 20); do
+            STATUS=$(curl -sLo /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" = "200" ]; then
+              echo "Asset available after attempt $i"
+              exit 0
+            fi
+            echo "Attempt $i: got $STATUS, retrying in 30s..."
+            sleep 30
+          done
+          echo "Asset not available after 10 minutes"
+          exit 1
+
+  publish-to-bcr:
+    needs: wait-for-release
     permissions:
       contents: write
       id-token: write
