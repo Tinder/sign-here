@@ -1,0 +1,20 @@
+{
+  "homepage": "https://github.com/Tinder/sign-here",
+  "maintainers": [
+    {
+      "name": "Maxwell Elliott",
+      "email": "maxwell.elliott@gotinder.com",
+      "github": "tinder-maxwellelliott"
+    },
+    {
+      "name": "Maxwell Elliott",
+      "email": "maxwell@elliott.now",
+      "github": "maxwellE"
+    }
+  ],
+  "repository": [
+    "github:Tinder/sign-here"
+  ],
+  "versions": [],
+  "yanked_versions": {}
+}
