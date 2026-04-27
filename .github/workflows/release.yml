@@ -11,13 +11,65 @@ permissions:
   contents: write
 
 jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: bazel-contrib/setup-bazel@0.9.1
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - name: Prepare release files and notes
+        run: .github/workflows/release_prep.sh ${{ github.ref_name }} > release_notes.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: |
+            sign-here-v*.tar.gz
+            sign-here-v*-darwin-arm64
+            release_notes.md
+          if-no-files-found: error
+
+  attest:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-files
+      - name: Attest release files
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            sign-here-v*.tar.gz
+            sign-here-v*-darwin-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: attestations
+          path: "*.intoto.jsonl"
+
   release:
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.2.2
-    with:
-      release_files: |
-        sign-here-v*.tar.gz
-        sign-here-v*-darwin-arm64
-      prerelease: false
+    needs: [build, attest]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-files
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: attestations
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-files/release_notes.md
+          prerelease: false
+          files: |
+            release-files/sign-here-v*.tar.gz
+            release-files/sign-here-v*-darwin-arm64
+            attestations/*.intoto.jsonl
 
   publish-to-bcr:
     needs: release
