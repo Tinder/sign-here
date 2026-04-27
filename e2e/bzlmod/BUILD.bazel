@@ -1,0 +1,4 @@
+alias(
+    name = "sign-here",
+    actual = "@sign-here//Sources/SignHereTool:sign-here",
+)
