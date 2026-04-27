@@ -5,25 +5,22 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+
 jobs:
-  github-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create ${{ github.ref_name }} \
-            --generate-notes \
-            --title "${{ github.ref_name }}"
+  release:
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.2.2
+    with:
+      release_files: |
+        sign-here-v*.tar.gz
+        sign-here-v*-darwin-arm64
+      prerelease: false
 
   publish-to-bcr:
-    name: Publish to BCR
-    needs: github-release
+    needs: release
     permissions:
       contents: write
       id-token: write
