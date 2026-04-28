@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   id-token: write
@@ -101,7 +101,7 @@ jobs:
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v0.2.2
     with:
       tag_name: ${{ github.ref_name }}
-      registry_fork: "maxwellelliott/bazel-central-registry"
+      registry_fork: "maxwellE/bazel-central-registry"
       attest: false
       draft: true
     secrets:

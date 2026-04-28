@@ -3,18 +3,18 @@
   "maintainers": [
     {
       "name": "Maxwell Elliott",
-      "email": "maxwell.elliott@gotinder.com",
-      "github": "tinder-maxwellelliott"
+      "email": "maxwell@elliott.now",
+      "github": "maxwellE",
+      "github_user_id": 566328
     },
     {
-      "name": "Maxwell Elliott",
-      "email": "maxwell@elliott.now",
-      "github": "maxwellE"
+      "name": "Maxwell Elliott (Tinder)",
+      "email": "maxwell.elliott@tinder.com",
+      "github": "tinder-maxwellelliott",
+      "github_user_id": 56700854
     }
   ],
-  "repository": [
-    "github:Tinder/sign-here"
-  ],
+  "repository": ["github:Tinder/sign-here"],
   "versions": [],
   "yanked_versions": {}
 }
