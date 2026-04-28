@@ -193,7 +193,7 @@
     "//:extensions.bzl%non_module_dependencies": {
       "general": {
         "bzlTransitiveDigest": "99DXTE776KiHpBAFrUw7CkIIBI2frZZ+V4LixlaKLM8=",
-        "usagesDigest": "ySuj/WUX705NnPBivhR7BGHcD8dBT/wpo54Vlrp+1dY=",
+        "usagesDigest": "6+0vsijgR1ETzg2/FxH9OWxDRdrRBJmzei2Y6v0sE8M=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
