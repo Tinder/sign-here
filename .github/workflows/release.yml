@@ -104,5 +104,7 @@ jobs:
       registry_fork: "maxwellE/bazel-central-registry"
       attest: false
       draft: true
+      committer_name: maxwellE
+      committer_email: maxwellE@users.noreply.github.com
     secrets:
       publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
