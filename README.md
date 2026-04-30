@@ -212,10 +212,10 @@ OPTIONS:
 
 ### Download pre-built binary
 
-Release tags follow `v*` (for example `v1.0.12`). GitHub Actions publishes a macOS arm64 binary for each tag.
+Release tags follow `v*` (for example `v1.0.13`). GitHub Actions publishes a macOS arm64 binary for each tag.
 
 ```terminal
-curl -fL "https://github.com/Tinder/sign-here/releases/download/v1.0.12/sign-here-v1.0.12-darwin-arm64" -o sign-here
+curl -fL "https://github.com/Tinder/sign-here/releases/download/v1.0.13/sign-here-v1.0.13-darwin-arm64" -o sign-here
 chmod +x sign-here
 ./sign-here
 ```
@@ -225,7 +225,7 @@ chmod +x sign-here
 Add to your `MODULE.bazel`:
 
 ```starlark
-bazel_dep(name = "sign-here", version = "1.0.12")
+bazel_dep(name = "sign-here", version = "1.0.13")
 ```
 
 The module is listed in the [Bazel Central Registry](https://registry.bazel.build/modules/sign-here). Then run:
@@ -242,7 +242,7 @@ If you still use a `WORKSPACE` file, pin the tagged release (Git tags use `v*`):
 ```starlark
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-_TAG = "v1.0.12"
+_TAG = "v1.0.13"
 http_archive(
     name = "com_github_tinder_sign_here",
     url = "https://github.com/Tinder/sign-here/archive/refs/tags/%s.tar.gz" % _TAG,
