@@ -1,6 +1,6 @@
 module(
     name = "sign-here",
-    version = "1.0.14",
+    version = "1.0.15",
 )
 
 bazel_dep(name = "apple_support", version = "2.2.0", repo_name = "build_bazel_apple_support")
