@@ -3,9 +3,6 @@ common --enable_bzlmod
 build --incompatible_disallow_empty_glob
 build --apple_platform_type=macos
 build --incompatible_strict_action_env
-build --apple_crosstool_top=@local_config_apple_cc//:toolchain
-build --crosstool_top=@local_config_apple_cc//:toolchain
-build --host_crosstool_top=@local_config_apple_cc//:toolchain
 test --test_output=errors
 test --test_summary=detailed
 test:record_snapshots --spawn_strategy=local
