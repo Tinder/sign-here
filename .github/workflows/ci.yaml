@@ -43,3 +43,88 @@ jobs:
           name: sign-here_bzlmod
           path: bazel-bin/Sources/SignHereTool/sign-here
           if-no-files-found: error
+  coverage:
+    name: Enforce 90% line coverage
+    runs-on: macos-latest
+    env:
+      BAZEL: bazelisk
+    outputs:
+      badge_generated: ${{ steps.collect.outputs.badge_generated }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run coverage tool self-tests
+        run: python3 tools/coverage/check_coverage_test.py
+      - name: Collect and enforce Swift coverage
+        id: collect
+        run: |
+          python3 tools/coverage/check_coverage.py \
+            --threshold 90 \
+            --bazel bazelisk \
+            --badge-output coverage-badge.json
+          echo "badge_generated=true" >> "$GITHUB_OUTPUT"
+      - name: Upload LCOV report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: bazel-out/_sign_here_coverage/coverage.lcov
+          if-no-files-found: warn
+      - name: Upload coverage badge JSON
+        if: always() && steps.collect.outputs.badge_generated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-badge
+          path: coverage-badge.json
+          if-no-files-found: error
+  publish-coverage-badge:
+    name: Publish coverage badge
+    runs-on: ubuntu-latest
+    # Only publish on push to main; PRs read-only, so use the artifact from
+    # the same workflow run rather than re-running the macOS coverage build.
+    needs: coverage
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Download badge artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-badge
+          path: badge-staging
+      - name: Push badge to `badges` branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          BADGE_SRC="badge-staging/coverage-badge.json"
+          test -f "$BADGE_SRC" || { echo "missing $BADGE_SRC"; exit 1; }
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          mkdir badges-repo && cd badges-repo
+          git init -q
+          git remote add origin "$REPO_URL"
+
+          if git ls-remote --exit-code --heads origin badges >/dev/null 2>&1; then
+            git fetch origin badges --depth=1
+            git checkout -q badges
+          else
+            git checkout -q --orphan badges
+            git rm -rf . >/dev/null 2>&1 || true
+            printf '# Coverage badge data\n\nThis branch is auto-generated. Do not edit by hand.\n' > README.md
+            git add README.md
+          fi
+
+          cp "../$BADGE_SRC" coverage.json
+          git add coverage.json
+
+          if git diff --cached --quiet; then
+            echo "Badge unchanged; nothing to publish."
+            exit 0
+          fi
+
+          PCT=$(python3 -c 'import json,sys; print(json.load(open("coverage.json"))["message"])')
+          git commit -q -m "Update coverage badge ($PCT)"
+          git push -q origin badges

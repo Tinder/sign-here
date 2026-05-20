@@ -22,4 +22,3 @@
   - httpBody: Optional<Data>.none
   - httpBodyStream: Optional<NSInputStream>.none
   - httpShouldHandleCookies: true
-  - httpShouldUsePipelining: false

@@ -1,5 +1,7 @@
 # sign-here
 
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tinder/sign-here/badges/coverage.json)](https://github.com/Tinder/sign-here/actions/workflows/ci.yaml?query=branch%3Amain)
+
 A straightforward tool that enables the creation of Provisioning Profiles and Certificates for deploying Apple based software. This tool
 allows users to automate the creation of certificates and provisioning profiles in a simple to use API.
 
@@ -7,7 +9,7 @@ allows users to automate the creation of certificates and provisioning profiles 
 
 ## Prerequisites
 
-* Bazel (tested with release `8.2.1` using `bazelisk` on this machine)
+* Bazel (see https://bazel.build/install)
 * OpenSSL (this machine: `OpenSSL 3.6.1 27 Jan 2026 (Library: OpenSSL 3.6.1 27 Jan 2026)`)
 * Key Bazel module pins: `apple_support` 2.2.0, `rules_apple` 4.5.2, `rules_swift` 3.5.0, `swift_argument_parser` 1.3.1.2
 
