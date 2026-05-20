@@ -1,5 +1,7 @@
 # sign-here
 
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tinder/sign-here/badges/coverage.json)](https://github.com/Tinder/sign-here/actions/workflows/ci.yaml?query=branch%3Amain)
+
 A straightforward tool that enables the creation of Provisioning Profiles and Certificates for deploying Apple based software. This tool
 allows users to automate the creation of certificates and provisioning profiles in a simple to use API.
 

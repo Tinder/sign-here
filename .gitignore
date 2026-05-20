@@ -90,3 +90,7 @@ fastlane/test_output
 iOSInjectionProject/
 
 bazel-*
+
+# Python
+__pycache__/
+*.pyc

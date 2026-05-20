@@ -18,6 +18,7 @@ swift_test(
         allow_empty = False,
     ),
     deps = [
+        "//Sources/CoreLibrary",
         "//Sources/CoreLibrary:CoreLibrary_GeneratedMocks",
         "//Sources/CoreLibraryTestKit",
         "//Sources/SignHereLibrary",
