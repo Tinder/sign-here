@@ -48,20 +48,20 @@ jobs:
     runs-on: macos-latest
     env:
       BAZEL: bazelisk
-    outputs:
-      badge_generated: ${{ steps.collect.outputs.badge_generated }}
+      # The badge is only refreshed on main-branch pushes — PR runs enforce
+      # the threshold but never publish a badge.
+      EMIT_BADGE: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v3
       - name: Run coverage tool self-tests
         run: python3 tools/coverage/check_coverage_test.py
       - name: Collect and enforce Swift coverage
-        id: collect
         run: |
-          python3 tools/coverage/check_coverage.py \
-            --threshold 90 \
-            --bazel bazelisk \
-            --badge-output coverage-badge.json
-          echo "badge_generated=true" >> "$GITHUB_OUTPUT"
+          args=(--threshold 90 --bazel bazelisk)
+          if [ "$EMIT_BADGE" = "true" ]; then
+            args+=(--badge-output coverage-badge.json)
+          fi
+          python3 tools/coverage/check_coverage.py "${args[@]}"
       - name: Upload LCOV report
         if: always()
         uses: actions/upload-artifact@v4
@@ -70,7 +70,7 @@ jobs:
           path: bazel-out/_sign_here_coverage/coverage.lcov
           if-no-files-found: warn
       - name: Upload coverage badge JSON
-        if: always() && steps.collect.outputs.badge_generated == 'true'
+        if: env.EMIT_BADGE == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-badge
