@@ -23,4 +23,3 @@
     - some: 99 bytes
   - httpBodyStream: Optional<NSInputStream>.none
   - httpShouldHandleCookies: true
-  - httpShouldUsePipelining: false
