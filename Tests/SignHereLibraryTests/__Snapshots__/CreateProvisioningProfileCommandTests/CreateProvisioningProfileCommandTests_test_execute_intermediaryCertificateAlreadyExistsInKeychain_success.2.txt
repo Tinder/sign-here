@@ -1,0 +1,10 @@
+▿ 3 elements
+  ▿ (2 elements)
+    - .0: "Fetched certificate - ID: activeCertID, Display Name: activeCertDisplayName, Type: certificateType, Expiration Date: 1970-01-01 00:01:40 +0000"
+    - .1: "\n"
+  ▿ (2 elements)
+    - .0: "Keychain already contains intermediary Apple certificate /intermediaryAppleCertificate; continuing"
+    - .1: "\n"
+  ▿ (2 elements)
+    - .0: "createdProfileITCID"
+    - .1: "\n"
