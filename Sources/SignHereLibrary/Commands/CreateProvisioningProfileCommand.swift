@@ -551,13 +551,15 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
             "-T",
             "/usr/bin/codesign"
         ])
-        guard output.isSuccessful
-        else {
-           throw Error.unableToImportP12IdentityIntoKeychain(
-               keychainName: keychainName,
-               p12Identity: p12Identity,
-               output: output
-           )
+        try requireSuccessfulOrAlreadyPresentKeychainImport(
+            output: output,
+            itemDescription: "P12 identity"
+        ) {
+            Error.unableToImportP12IdentityIntoKeychain(
+                keychainName: keychainName,
+                p12Identity: p12Identity,
+                output: output
+            )
         }
     }
 
@@ -572,11 +574,40 @@ internal struct CreateProvisioningProfileCommand: ParsableCommand {
                 "-T",
                 "/usr/bin/codesign"
             ])
-            guard output.isSuccessful
-            else {
-                throw Error.unableToImportIntermediaryAppleCertificate(certificate: cert, output: output)
+            try requireSuccessfulOrAlreadyPresentKeychainImport(
+                output: output,
+                itemDescription: "intermediary Apple certificate \(cert)"
+            ) {
+                Error.unableToImportIntermediaryAppleCertificate(
+                    certificate: cert,
+                    output: output
+                )
             }
         }
+    }
+
+    private func requireSuccessfulOrAlreadyPresentKeychainImport(
+        output: ShellOutput,
+        itemDescription: String,
+        makeError: () -> Error
+    ) throws {
+        if output.isSuccessful {
+            return
+        }
+        if containsAlreadyExistsInKeychain(output) {
+            log.append(
+                "Keychain already contains \(itemDescription); continuing"
+            )
+            return
+        }
+        throw makeError()
+    }
+
+    private func containsAlreadyExistsInKeychain(
+        _ output: ShellOutput
+    ) -> Bool {
+        let combinedOutput: String = output.outputString + output.errorString
+        return combinedOutput.contains("already exists in the keychain")
     }
 
     private func updateKeychainPartitionList() throws {

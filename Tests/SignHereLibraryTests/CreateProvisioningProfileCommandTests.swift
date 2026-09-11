@@ -261,6 +261,251 @@ final class CreateProvisioningProfileCommandTests: XCTestCase {
         XCTAssertEqual(fileDataReads.count, 0)
     }
 
+    func test_execute_p12AlreadyExistsInKeychain_success() throws {
+        // GIVEN
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(
+                status: 1,
+                data: .init(),
+                errorData: .init("security: SecKeychainItemImport: The specified item already exists in the keychain".utf8)
+            ),
+            .init(status: 0, data: .init("importIntermediateAppleCertificate".utf8), errorData: .init()),
+            .init(status: 0, data: .init("updateKeychainPartitionList".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            self.createCreateProfileResponse()
+        }
+
+        // WHEN
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_intermediaryCertificateAlreadyExistsInKeychain_success() throws {
+        // GIVEN
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importP12IdentityIntoKeychain".utf8), errorData: .init()),
+            .init(
+                status: 1,
+                data: .init(),
+                errorData: .init("security: SecKeychainItemImport: The specified item already exists in the keychain".utf8)
+            ),
+            .init(status: 0, data: .init("updateKeychainPartitionList".utf8), errorData: .init())
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            self.createCreateProfileResponse()
+        }
+
+        // WHEN
+        try subject.run()
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_importP12IdentityIntoKeychain_failure() throws {
+        // GIVEN
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(
+                status: 1,
+                data: .init("importP12IdentityIntoKeychain".utf8),
+                errorData: .init("security: SecKeychainItemImport: CSSMERR_DL_INVALID_RECORDTYPE".utf8)
+            )
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            XCTFail("Shouldn't be executed")
+            return self.createCreateProfileResponse()
+        }
+
+        // WHEN
+        XCTAssertThrowsError(
+            try subject.run()
+        ) {
+            if case CreateProvisioningProfileCommand.Error.unableToImportP12IdentityIntoKeychain = $0 {
+                assertSnapshot(
+                    matching: $0.localizedDescription,
+                    as: .lines
+                )
+            } else {
+                XCTFail("Unexpected error: \($0)")
+            }
+        }
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
+    func test_execute_importIntermediaryAppleCertificate_failure() throws {
+        // GIVEN
+        files.uniqueTemporaryPathHandler = {
+            Path("/unique_temporary_path_\(self.files.uniqueTemporaryPathCallCount)")
+        }
+        var executeLaunchPaths: [ShellOutput] = [
+            .init(status: 0, data: .init("createCSR".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createPEM".utf8), errorData: .init()),
+            .init(status: 0, data: .init("createP12Identity".utf8), errorData: .init()),
+            .init(status: 0, data: .init("importP12IdentityIntoKeychain".utf8), errorData: .init()),
+            .init(
+                status: 1,
+                data: .init("importIntermediateAppleCertificate".utf8),
+                errorData: .init("security: SecKeychainItemImport: CSSMERR_DL_INVALID_RECORDTYPE".utf8)
+            )
+        ]
+        shell.executeLaunchPathHandler = { _, _, _, _ in
+            executeLaunchPaths.removeFirst()
+        }
+        var fileDataReads: [Data] = [
+            Data("iTunesConnectAPIKey".utf8)
+        ]
+        files.readPathHandler = { _ in
+            fileDataReads.removeFirst()
+        }
+        iTunesConnectService.fetchITCDeviceIDsHandler = { _ in
+            Set()
+        }
+        iTunesConnectService.fetchActiveCertificatesHandler = { _, _, _, _ in
+            self.createDownloadCertificateResponse().data
+        }
+        iTunesConnectService.createCertificateHandler = { _, _, _ in
+            self.createCreateCertificateResponse()
+        }
+        iTunesConnectService.createProfileHandler = { _, _, _, _, _, _ in
+            XCTFail("Shouldn't be executed")
+            return self.createCreateProfileResponse()
+        }
+
+        // WHEN
+        XCTAssertThrowsError(
+            try subject.run()
+        ) {
+            if case CreateProvisioningProfileCommand.Error.unableToImportIntermediaryAppleCertificate = $0 {
+                assertSnapshot(
+                    matching: $0.localizedDescription,
+                    as: .lines
+                )
+            } else {
+                XCTFail("Unexpected error: \($0)")
+            }
+        }
+
+        // THEN
+        assertSnapshot(
+            matching: shell.executeLaunchPathArgValues,
+            as: .dump
+        )
+        assertSnapshot(
+            matching: log.appendArgValues,
+            as: .dump
+        )
+
+        XCTAssertEqual(executeLaunchPaths.count, 0)
+        XCTAssertEqual(fileDataReads.count, 0)
+    }
+
     func test_execute_savesCertificateArtifactsWhenDirectoryIsProvided() throws {
         var fileDataReads: [Data] = [
             Data("iTunesConnectAPIKey".utf8)
