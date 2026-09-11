@@ -9,8 +9,8 @@ allows users to automate the creation of certificates and provisioning profiles 
 
 ## Prerequisites
 
-* Bazel (see https://bazel.build/install)
-* OpenSSL (this machine: `OpenSSL 3.6.1 27 Jan 2026 (Library: OpenSSL 3.6.1 27 Jan 2026)`)
+* Bazel (tested with release `8.2.1` using `bazelisk` on this machine)
+* OpenSSL (this machine: `OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)`)
 * Key Bazel module pins: `apple_support` 2.2.0, `rules_apple` 4.5.2, `rules_swift` 3.5.0, `swift_argument_parser` 1.3.1.2
 
 ## Getting Started
@@ -214,10 +214,10 @@ OPTIONS:
 
 ### Download pre-built binary
 
-Release tags follow `v*` (for example `v2.5.4`). GitHub Actions publishes a macOS arm64 binary for each tag.
+Release tags follow `v*` (for example `v2.5.5`). GitHub Actions publishes a macOS arm64 binary for each tag.
 
 ```terminal
-curl -fL "https://github.com/Tinder/sign-here/releases/download/v2.5.4/sign-here-v2.5.4-darwin-arm64" -o sign-here
+curl -fL "https://github.com/Tinder/sign-here/releases/download/v2.5.5/sign-here-v2.5.5-darwin-arm64" -o sign-here
 chmod +x sign-here
 ./sign-here
 ```
@@ -227,7 +227,7 @@ chmod +x sign-here
 Add to your `MODULE.bazel`:
 
 ```starlark
-bazel_dep(name = "sign-here", version = "2.5.4")
+bazel_dep(name = "sign-here", version = "2.5.5")
 ```
 
 The module is listed in the [Bazel Central Registry](https://registry.bazel.build/modules/sign-here). Then run:
@@ -244,7 +244,7 @@ If you still use a `WORKSPACE` file, pin the tagged release (Git tags use `v*`):
 ```starlark
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-_TAG = "v2.5.4"
+_TAG = "v2.5.5"
 http_archive(
     name = "com_github_tinder_sign_here",
     url = "https://github.com/Tinder/sign-here/archive/refs/tags/%s.tar.gz" % _TAG,
@@ -274,8 +274,8 @@ Thanks to everyone who has contributed:
   <a href="https://github.com/Tinder-OscarBerggren"><img src="https://avatars.githubusercontent.com/u/181766865?s=64&v=4" width="40" height="40" alt="@Tinder-OscarBerggren" title="@Tinder-OscarBerggren"></a>
   <a href="https://github.com/andres97medrano"><img src="https://avatars.githubusercontent.com/u/22537203?s=64&v=4" width="40" height="40" alt="@andres97medrano" title="@andres97medrano"></a>
   <a href="https://github.com/erikkerber"><img src="https://avatars.githubusercontent.com/u/75236?s=64&v=4" width="40" height="40" alt="@erikkerber" title="@erikkerber"></a>
-  <a href="https://github.com/tinder-calebdavis"><img src="https://avatars.githubusercontent.com/u/65983433?s=64&v=4" width="40" height="40" alt="@tinder-calebdavis" title="@tinder-calebdavis"></a>
   <a href="https://github.com/tinder-cwybranowski"><img src="https://avatars.githubusercontent.com/u/40372184?s=64&v=4" width="40" height="40" alt="@tinder-cwybranowski" title="@tinder-cwybranowski"></a>
+  <a href="https://github.com/tinder-calebdavis"><img src="https://avatars.githubusercontent.com/u/65983433?s=64&v=4" width="40" height="40" alt="@tinder-calebdavis" title="@tinder-calebdavis"></a>
 </p>
 
 
