@@ -41,7 +41,7 @@ OVERVIEW: Use this command to create a keychain to populate with signing
 information in the `create-provisioning-profile` command
 
 This command sets up a keychain that is ready to use for signing actions. This
-command is not required and you may setup your own keychain
+command is not required and you may set up your own keychain
 for usage in the `create-provisioning-profile` command.
 
 USAGE: sign-here create-keychain --keychain-name <keychain-name> --keychain-password <keychain-password>
