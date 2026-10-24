@@ -4,18 +4,20 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
 import re
 import shutil
 import subprocess
 import sys
+import time
+from collections import defaultdict
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 REPO_SLUG = "Tinder/sign-here"
-GITHUB_API = f"https://api.github.com/repos/{REPO_SLUG}/contributors"
 
 
 def _workspace_root() -> Path:
@@ -160,50 +162,174 @@ sign_here_dependencies()
 
 Use the `sha256` / `integrity` values printed by [.github/workflows/release_prep.sh](.github/workflows/release_prep.sh) for the matching Git tag when cutting from an `http_archive` instead of git."""
 
-def _fetch_contributors() -> str | None:
-    req = Request(
-        f"{GITHUB_API}?per_page=100",
-        headers={
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "sign-here-readme-generator",
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
+# ---------------------------------------------------------------------------
+# Contributors (ported from Tinder/bazel-diff tools/generate_readme.py)
+#
+# `git log` is the source of truth so every committer appears, including people
+# whose commits were squashed or who pushed from several emails. Emails are
+# resolved to GitHub logins via the commits API (for avatars and profile links),
+# falling back to parsing `<id>+<login>@users.noreply.github.com` addresses.
+# ---------------------------------------------------------------------------
+
+CONTRIBUTOR_COLUMNS = 6
+
+
+def _github_headers() -> dict[str, str]:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "sign-here-readme-generator",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def _is_bot_account(name: str = "", login: str = "", account_type: str = "") -> bool:
+    """Return True for GitHub Apps / Actions bots that should not appear as contributors."""
+    if account_type == "Bot":
+        return True
+    # GitHub bot logins and commit author names conventionally end with "[bot]".
+    return any(value.lower().endswith("[bot]") for value in (name, login))
+
+
+def _resolve_noreply_username(email: str) -> str | None:
+    """Extract a GitHub login from a noreply address as a last-resort fallback."""
+    if not email.endswith("@users.noreply.github.com"):
+        return None
+    local = email.split("@", 1)[0]
+    # Strip the leading numeric id: "12345+username" -> "username".
+    return local.split("+")[-1] or None
+
+
+def _fetch_github_email_map(repo: str = REPO_SLUG) -> dict[str, dict[str, str]]:
+    """Page through the GitHub commits API and return email -> {login, avatar_url}."""
+    email_map: dict[str, dict[str, str]] = {}
+    page = 1
+    while True:
+        url = f"https://api.github.com/repos/{repo}/commits?per_page=100&page={page}"
+        req = Request(url, headers=_github_headers())
+        try:
+            with urlopen(req, timeout=30) as resp:
+                commits = json.loads(resp.read().decode("utf-8"))
+        except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+            print(f"warning: GitHub commits API error on page {page}: {exc}", file=sys.stderr)
+            break
+        if not isinstance(commits, list):
+            break
+
+        for commit in commits:
+            gh_author = commit.get("author") or {}
+            email = ((commit.get("commit") or {}).get("author") or {}).get("email", "")
+            login = gh_author.get("login")
+            if not (login and email) or email in email_map:
+                continue
+            if _is_bot_account(login=login, account_type=gh_author.get("type", "")):
+                continue
+            email_map[email] = {"login": login, "avatar_url": gh_author.get("avatar_url", "")}
+
+        if len(commits) < 100:
+            break
+        page += 1
+        time.sleep(0.1)
+
+    return email_map
+
+
+def _git_author_log(root: Path) -> str:
+    r = subprocess.run(
+        ["git", "-C", str(root), "log", "--format=%aN\t%aE"],
+        check=True,
+        capture_output=True,
+        text=True,
     )
-    try:
-        with urlopen(req, timeout=30) as resp:
-            body = resp.read().decode("utf-8")
-    except (HTTPError, URLError, TimeoutError, OSError):
-        return None
+    return r.stdout
 
-    try:
-        data = json.loads(body)
-    except json.JSONDecodeError:
-        return None
 
-    if not isinstance(data, list) or not data:
-        return None
+def _roll_up_authors(log_text: str) -> list[tuple[str, str, int]]:
+    """Aggregate `name<TAB>email` lines into (name, best_email, total_commits).
 
-    lines = [
-        "## Contributors",
-        "",
-        "Thanks to everyone who has contributed:",
-        "",
-        '<p align="left">',
-    ]
-    for row in sorted(data, key=lambda x: (-int(x.get("contributions", 0)), x.get("login", ""))):
-        login = row.get("login")
-        if not login:
+    Commits are rolled up by author name; the email with the most commits for
+    that name is kept for GitHub resolution. Sorted by total commits, descending,
+    then by name for a stable layout.
+    """
+    pair_counts: dict[tuple[str, str], int] = defaultdict(int)
+    for line in log_text.splitlines():
+        if "\t" not in line:
             continue
-        avatar = row.get("avatar_url") or ""
-        # Fixed size avatars for stable layout in Markdown renderers.
-        img = f"{avatar.split('?', 1)[0]}?s=64&v=4" if avatar else ""
-        lines.append(
-            f'  <a href="https://github.com/{login}">'
-            f'<img src="{img}" width="40" height="40" alt="@{login}" title="@{login}"></a>'
-        )
-    lines.append("</p>")
-    lines.append("")
-    return "\n".join(lines)
+        name, email = (part.strip() for part in line.split("\t", 1))
+        if name and not _is_bot_account(name=name):
+            pair_counts[(name, email)] += 1
+
+    totals: dict[str, int] = defaultdict(int)
+    best_email: dict[str, str] = {}
+    best_count: dict[str, int] = defaultdict(int)
+    for (name, email), count in pair_counts.items():
+        totals[name] += count
+        if count > best_count[name]:
+            best_count[name] = count
+            best_email[name] = email
+
+    ordered = sorted(totals.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [(name, best_email[name], total) for name, total in ordered]
+
+
+def _build_contributors_table(
+    authors: list[tuple[str, str, int]],
+    email_map: dict[str, dict[str, str]],
+    columns: int = CONTRIBUTOR_COLUMNS,
+) -> str:
+    cells: list[str] = []
+    for name, email, _total in authors:
+        user = email_map.get(email)
+        if not user:
+            login = _resolve_noreply_username(email)
+            if login and not _is_bot_account(login=login):
+                user = {"login": login, "avatar_url": f"https://avatars.githubusercontent.com/{login}"}
+
+        safe_name = html.escape(name, quote=True)
+        if user:
+            login = user["login"]
+            if _is_bot_account(name=name, login=login):
+                continue
+            avatar = (user.get("avatar_url") or f"https://avatars.githubusercontent.com/{login}").split("?", 1)[0]
+            cells.append(
+                f'<td align="center">'
+                f'<a href="https://github.com/{login}">'
+                f'<img src="{avatar}?s=64" width="64" alt="{safe_name}"/><br/>'
+                f"<sub><b>{safe_name}</b></sub>"
+                f"</a></td>"
+            )
+        else:
+            print(f"warning: no GitHub login resolved for {name} <{email}>", file=sys.stderr)
+            cells.append(f'<td align="center"><sub><b>{safe_name}</b></sub></td>')
+
+    rows = ["<table>"]
+    for i in range(0, len(cells), columns):
+        rows.append("  <tr>")
+        rows.extend(f"    {cell}" for cell in cells[i : i + columns])
+        rows.append("  </tr>")
+    rows.append("</table>")
+    return "\n".join(rows)
+
+
+def _contributors_section(root: Path, *, offline: bool) -> str:
+    authors = _roll_up_authors(_git_author_log(root))
+    email_map = {} if offline else _fetch_github_email_map()
+    if offline:
+        print("warning: --offline set; avatars only for noreply.github.com authors", file=sys.stderr)
+    table = _build_contributors_table(authors, email_map)
+    return "\n".join(
+        [
+            "## Contributors",
+            "",
+            "Thanks to everyone who has contributed:",
+            "",
+            table,
+            "",
+        ]
+    )
 
 
 def main() -> int:
@@ -211,7 +337,7 @@ def main() -> int:
     parser.add_argument(
         "--offline",
         action="store_true",
-        help="Skip GitHub contributors (no network).",
+        help="Skip the GitHub API; contributors still come from git log (avatars only via noreply emails).",
     )
     parser.add_argument(
         "-o",
@@ -239,16 +365,7 @@ def main() -> int:
     template_path = root / "tools/readme/README.template.md"
     template = template_path.read_text(encoding="utf-8")
 
-    contributors = "" if args.offline else _fetch_contributors()
-    contributors_section = ""
-    if contributors:
-        contributors_section = contributors
-    else:
-        contributors_section = (
-            "## Contributors\n\n"
-            "_Contributor avatars are inserted when you regenerate with network access "
-            "(`bazel run //:generate_readme`). Use `--offline` to skip._\n"
-        )
+    contributors_section = _contributors_section(root, offline=args.offline)
 
     subs = {
         "PREREQUISITES": _prerequisites_lines(),
