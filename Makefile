@@ -1,4 +1,4 @@
-.PHONY: record_snapshots coverage coverage_tool_test
+.PHONY: record_snapshots coverage coverage_tool_test generate_readme readme_tool_test
 
 record_snapshots:
 	bazel test //Tests/... \
@@ -15,3 +15,13 @@ coverage:
 # Self-tests for the coverage tool itself.
 coverage_tool_test:
 	python3 tools/coverage/check_coverage_test.py
+
+# Regenerate README.md from tools/readme/README.template.md (live CLI help,
+# module version, and the contributors table built from git log + GitHub API).
+# Set GITHUB_TOKEN to avoid API rate limits. Commit the result.
+generate_readme:
+	bazel run //:generate_readme
+
+# Self-tests for the README generator's contributor logic.
+readme_tool_test:
+	python3 tools/readme/generate_readme_test.py

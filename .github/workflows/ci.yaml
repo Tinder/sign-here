@@ -70,6 +70,8 @@ jobs:
           bazelisk-version: 1.30.0
       - name: Run coverage tool self-tests
         run: python3 tools/coverage/check_coverage_test.py
+      - name: Run README tool self-tests
+        run: python3 tools/readme/generate_readme_test.py
       - name: Collect and enforce Swift coverage
         run: |
           args=(--threshold 90 --bazel bazelisk)

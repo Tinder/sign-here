@@ -268,16 +268,19 @@ bazel test //Tests/...
 
 Thanks to everyone who has contributed:
 
-<p align="left">
-  <a href="https://github.com/tinder-maxwellelliott"><img src="https://avatars.githubusercontent.com/u/56700854?s=64&v=4" width="40" height="40" alt="@tinder-maxwellelliott" title="@tinder-maxwellelliott"></a>
-  <a href="https://github.com/omarzl"><img src="https://avatars.githubusercontent.com/u/6267487?s=64&v=4" width="40" height="40" alt="@omarzl" title="@omarzl"></a>
-  <a href="https://github.com/Tinder-OscarBerggren"><img src="https://avatars.githubusercontent.com/u/181766865?s=64&v=4" width="40" height="40" alt="@Tinder-OscarBerggren" title="@Tinder-OscarBerggren"></a>
-  <a href="https://github.com/andres97medrano"><img src="https://avatars.githubusercontent.com/u/22537203?s=64&v=4" width="40" height="40" alt="@andres97medrano" title="@andres97medrano"></a>
-  <a href="https://github.com/erikkerber"><img src="https://avatars.githubusercontent.com/u/75236?s=64&v=4" width="40" height="40" alt="@erikkerber" title="@erikkerber"></a>
-  <a href="https://github.com/tinder-cwybranowski"><img src="https://avatars.githubusercontent.com/u/40372184?s=64&v=4" width="40" height="40" alt="@tinder-cwybranowski" title="@tinder-cwybranowski"></a>
-  <a href="https://github.com/tinder-calebdavis"><img src="https://avatars.githubusercontent.com/u/65983433?s=64&v=4" width="40" height="40" alt="@tinder-calebdavis" title="@tinder-calebdavis"></a>
-</p>
-
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/tinder-maxwellelliott"><img src="https://avatars.githubusercontent.com/u/56700854?s=64" width="64" alt="Maxwell Elliott"/><br/><sub><b>Maxwell Elliott</b></sub></a></td>
+    <td align="center"><a href="https://github.com/omarzl"><img src="https://avatars.githubusercontent.com/u/6267487?s=64" width="64" alt="Omar Zúñiga Lagunas"/><br/><sub><b>Omar Zúñiga Lagunas</b></sub></a></td>
+    <td align="center"><a href="https://github.com/Tinder-OscarBerggren"><img src="https://avatars.githubusercontent.com/u/181766865?s=64" width="64" alt="Oscar Berggren"/><br/><sub><b>Oscar Berggren</b></sub></a></td>
+    <td align="center"><a href="https://github.com/andres97medrano"><img src="https://avatars.githubusercontent.com/u/22537203?s=64" width="64" alt="Andrés Medrano"/><br/><sub><b>Andrés Medrano</b></sub></a></td>
+    <td align="center"><a href="https://github.com/tinder-cwybranowski"><img src="https://avatars.githubusercontent.com/u/40372184?s=64" width="64" alt="Connor Wybranowski"/><br/><sub><b>Connor Wybranowski</b></sub></a></td>
+    <td align="center"><a href="https://github.com/erikkerber"><img src="https://avatars.githubusercontent.com/u/75236?s=64" width="64" alt="Erik Kerber"/><br/><sub><b>Erik Kerber</b></sub></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/tinder-calebdavis"><img src="https://avatars.githubusercontent.com/u/65983433?s=64" width="64" alt="Caleb Davis"/><br/><sub><b>Caleb Davis</b></sub></a></td>
+  </tr>
+</table>
 
 ## License
 
