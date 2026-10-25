@@ -1,5 +1,5 @@
 //
-//  CreateProfileResponse.swift
+//  ProfileResponseData.swift
 //  Models
 //
 //  Created by Omar Zuniga on 29/05/24.
