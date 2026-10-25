@@ -214,10 +214,10 @@ OPTIONS:
 
 ### Download pre-built binary
 
-Release tags follow `v*` (for example `v2.5.5`). GitHub Actions publishes a macOS arm64 binary for each tag.
+Release tags follow `v*` (for example `v3.0.0`). GitHub Actions publishes a macOS arm64 binary for each tag.
 
 ```terminal
-curl -fL "https://github.com/Tinder/sign-here/releases/download/v2.5.5/sign-here-v2.5.5-darwin-arm64" -o sign-here
+curl -fL "https://github.com/Tinder/sign-here/releases/download/v3.0.0/sign-here-v3.0.0-darwin-arm64" -o sign-here
 chmod +x sign-here
 ./sign-here
 ```
@@ -227,7 +227,7 @@ chmod +x sign-here
 Add to your `MODULE.bazel`:
 
 ```starlark
-bazel_dep(name = "sign-here", version = "2.5.5")
+bazel_dep(name = "sign-here", version = "3.0.0")
 ```
 
 The module is listed in the [Bazel Central Registry](https://registry.bazel.build/modules/sign-here). Then run:
@@ -244,7 +244,7 @@ If you still use a `WORKSPACE` file, pin the tagged release (Git tags use `v*`):
 ```starlark
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-_TAG = "v2.5.5"
+_TAG = "v3.0.0"
 http_archive(
     name = "com_github_tinder_sign_here",
     url = "https://github.com/Tinder/sign-here/archive/refs/tags/%s.tar.gz" % _TAG,
@@ -279,8 +279,10 @@ Thanks to everyone who has contributed:
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/tinder-calebdavis"><img src="https://avatars.githubusercontent.com/u/65983433?s=64" width="64" alt="Caleb Davis"/><br/><sub><b>Caleb Davis</b></sub></a></td>
+    <td align="center"><a href="https://github.com/Avicennasis"><img src="https://avatars.githubusercontent.com/u/913872?s=64" width="64" alt="Léon Avic Simmons"/><br/><sub><b>Léon Avic Simmons</b></sub></a></td>
   </tr>
 </table>
+
 
 ## License
 
